@@ -156,7 +156,10 @@ if st.button("⚡ Run Daily Market Scan"):
                 
                 # Bottom Subplot: Relative Strength Index Panel
                 fig.add_trace(gr.Scatter(x=data.index, y=data["RSI"], name="RSI", line=dict(color="purple")), row=2, col=1)
-                
+                fig.add_hline(y=70, line_dash="dot", line_color="red", line_width=1.5, row=2, col=1)
+                fig.add_hline(y=30, line_dash="dot", line_color="green", line_width=1.5, row=2, col=1)
+                fig.update_yaxes(range=[10, 90], row=2, col=1)
+
                 fig.update_layout(height=400, margin=dict(l=10, r=10, t=30, b=10), showlegend=False)
                 st.subheader(f"📈 Framework Analysis: {ticker}")
                 st.plotly_chart(fig, use_container_width=True)
