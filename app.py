@@ -144,12 +144,53 @@ if st.button("⚡ Run Daily Market Scan"):
                     "Signal": recommendation,
                     "ATR Stop Target": stop_print
                 })
-                
+#---------------------------------------------------------------------------------           
+                # Identify exact shift coordinates where the position turns on or off
+                # 1 = Turned on (Buy), -1 = Turned off (Sell)
+                data["State_Shift"] = data["Position"].diff()
+
+                # Isolate data rows where entries and exits occurred
+                buy_signals = data[data["State_Shift"] == 1]
+                sell_signals = data[(data["State_Shift"] == -1) | ((data["Position"].shift(1) == 1) & (data["Position"] == 0))]
+#---------------------------------------------------------------------------------
+
                 # 4. Construct mobile-optimized charts using Plotly
                 fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08, row_heights=[0.6, 0.4])
                 
                 # Top Subplot: Prices, Channels, and Stop Floors
                 fig.add_trace(gr.Scatter(x=data.index, y=data["Close"], name="Price", line=dict(color="black")), row=1, col=1)
+
+#-----------------------------------------------------------------------------
+                # 1. Main Price Line Chart Layer
+                fig.add_trace(gr.Scatter(x=data.index, y=data["Close"], name="Price", line=dict(color="black")), row=1, col=1)
+
+                # 2. GREEN BUY DOT LAYER: Materializes only on exact entry days
+                if not buy_signals.empty:
+                    fig.add_trace(gr.Scatter(
+                        x=buy_signals.index,
+                        y=buy_signals["Close"],
+                        mode="markers",
+                        name="BUY Trigger",
+                        marker=dict(color="limegreen", size=11, symbol="circle", line=dict(width=2, color="white")),
+                        hoverinfo="text",
+                        hovertext=[f"BUY Trigger<br>Price: ${p:.2f}" for p in buy_signals["Close"]]
+                    ), row=1, col=1)
+
+                # 3. RED SELL DOT LAYER: Materializes only on exact exit days
+                if not sell_signals.empty:
+                    fig.add_trace(gr.Scatter(
+                        x=sell_signals.index,
+                        y=sell_signals["Close"],
+                        mode="markers",
+                        name="SELL Trigger",
+                        marker=dict(color="crimson", size=11, symbol="circle", line=dict(width=2, color="white")),
+                        hoverinfo="text",
+                        hovertext=[f"SELL Trigger<br>Price: ${p:.2f}" for p in sell_signals["Close"]]
+                    ), row=1, col=1)
+
+                # [Your Support, Resistance, and RSI traces continue as normal below...]
+#---------------------------------------------------------------------------------------
+
                 fig.add_trace(gr.Scatter(x=data.index, y=data["Support"], name="Support", line=dict(color="green", dash="dash"), opacity=0.3), row=1, col=1)
                 fig.add_trace(gr.Scatter(x=data.index, y=data["Resistance"], name="Resistance", line=dict(color="red", dash="dash"), opacity=0.3), row=1, col=1)
                 fig.add_trace(gr.Scatter(x=data.index, y=data["Stop_Line"], name="ATR Stop", line=dict(color="orange", width=2)), row=1, col=1)
