@@ -39,7 +39,7 @@ with col_logout:
         st.rerun()
 
 # User Input Array accessible directly from a mobile layout interface
-tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, AMZN")
+tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, NVDA")
 tickers = [t.strip().upper() for t in tickers_input.split(",")]
 
 if st.button("⚡ Run Daily Market Scan"):
@@ -54,8 +54,8 @@ if st.button("⚡ Run Daily Market Scan"):
                 if data.empty: continue
                 
                 # Math Indicators block (Support, Resistance, RSI, ATR)
-                data["Support"] = data["Close"].rolling(window=20).min()
-                data["Resistance"] = data["Close"].rolling(window=20).max()
+                data["Support"] = data["Close"].rolling(window=50).min()
+                data["Resistance"] = data["Close"].rolling(window=50).max()
                 
                 delta = data["Close"].diff()
                 gain = delta.where(delta > 0, 0.0)
