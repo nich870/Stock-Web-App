@@ -30,8 +30,7 @@ if not st.session_state["authenticated"]:
 # 3. AUTHENTICATED DASHBOARD AREA 
 # ==============================================================================
 col_title, col_logout = st.columns([0.8, 0.2])
-with col_title:
-    st.title("📊 Gebauer Stock Scanner")
+
 with col_logout:
     st.write("") 
     if st.button("🚪 Logout"):
@@ -41,6 +40,8 @@ with col_logout:
 app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
 if app_mode == "Market Scanner":
     # User Input Array accessible directly from a mobile layout interface
+    with col_title:
+        st.title("📊 Gebauer Stock Scanner")
     tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, NVDA")
     tickers = [t.strip().upper() for t in tickers_input.split(",")]
 
@@ -82,8 +83,7 @@ if app_mode == "Market Scanner":
                     data["Position"] = 0
                     data["Stop_Line"] = np.nan
                     current_position = 0
-                    highest_price = 0.0
-                    atr_multiplier = 2.5
+                    fixed_stop_floor = 0.0
                     
                     for i in range(1, len(data)):
                         c_price = data["Close"].iloc[i]
@@ -91,7 +91,6 @@ if app_mode == "Market Scanner":
                         c_rsi = data["RSI"].iloc[i]
                         c_sup = data["Support"].iloc[i]
                         c_res = data["Resistance"].iloc[i]
-                        c_atr = data["ATR"].iloc[i]
                         c_trend = data["Long_Trend"].iloc[i]
                         
                         # Safety Filter Check
@@ -107,15 +106,12 @@ if app_mode == "Market Scanner":
                         if current_position == 0:
                             if buy_trigger:
                                 current_position = 1
-                                highest_price = c_price
+                                # Lock the stop floor to the 50 day rolling window minus 2%
+                                fixed_stop_floor = c_sup * 0.98
                         else:
-                            if c_price > highest_price:
-                                highest_price = c_price
+                            data.iloc[i, data.columns.get_loc("Stop_Line")] = fixed_stop_floor
                             
-                            stop_floor = highest_price - (c_atr * atr_multiplier)
-                            data.iloc[i, data.columns.get_loc("Stop_Line")] = stop_floor
-                            
-                            if c_price <= stop_floor or sell_trigger:
+                            if c_price <= fixed_stop_floor or sell_trigger:
                                 current_position = 0
                                 
                         data.iloc[i, data.columns.get_loc("Position")] = current_position
@@ -134,7 +130,7 @@ if app_mode == "Market Scanner":
                     elif latest["Position"] == 1: recommendation = "🔵 HOLD LONG"
                     else: recommendation = "⚪ CASH (Wait)"
                     
-                    stop_print = f"${highest_price - (latest['ATR'] * atr_multiplier):.2f}" if latest["Position"] == 1 else "N/A"
+                    stop_print = f"${fixed_stop_floor:.2f}" if latest["Position"] == 1 else "N/A"
                     
                     # Check current regime status for the display block
                     is_bull_market = pd.notna(latest["Long_Trend"]) and (latest["Close"] > latest["Long_Trend"])
@@ -203,7 +199,7 @@ elif app_mode == "Account Ledger":
     LEDGER_FILE = "trading_ledger.csv"
     BALANCE_FILE = "capital_balance.txt"
     EQUITY_HISTORY_FILE = "equity_history.csv"
-    INITIAL_STARTING_CASH = 50000.00
+    INITIAL_STARTING_CASH = 5000.00
 
     def load_data():
         if os.path.exists(LEDGER_FILE):
@@ -455,7 +451,7 @@ elif app_mode == "Account Ledger":
             st.info("🔓 Admin Credentials Verified. Reset parameters unlocked.")
             
             # Requirement 2: Explicit Touch Safety Checkbox
-            confirm_wipe = st.checkbox("I verify that I want to completely delete my entire transaction history and reset my balance back to $50,000.00.")
+            confirm_wipe = st.checkbox("I verify that I want to completely delete my entire transaction history and reset my balance back to $5,000.00.")
             
             # Execute action block only if password is matching AND checkbox is checked
             if st.button("🔥 Confirm Complete Data Erasure", disabled=not confirm_wipe, use_container_width=True):
