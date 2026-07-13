@@ -203,4 +203,19 @@ elif menu_selection == "🏦 Account Capital Adjustments":
                     "Type": "DEPOSIT" if "DEPOSIT" in adj_type else "WITHDRAW", "Price": 1.0, 
                     "Capital": adj_amount, "Shares": 0.0, "PnL": 0.0, "Status": "SYSTEM"
                 }])
-df_ledger = pd.concat([df_ledger, adj_row], ignore_index=True)# Sync capital shifts into performance graph data matrices tracksnew_snapshot = pd.DataFrame([{"Date": adj_date, "Total_Net_Worth": new_portfolio_value}])df_equity = pd.concat([df_equity, new_snapshot], ignore_index=True)save_all(df_ledger, new_cash, df_equity)st.success(f"Balance adjustments updated successfully. New uninvested pool: ${new_cash:,.2f}")st.rerun()==============================================================================5. VIEW HISTORICAL TRANSACTION BOOK==============================================================================st.write("---")st.subheader("🗃️ Historical Transaction Logbook")if df_ledger.empty:st.write("No transaction data logged yet.")else:display_df = df_ledger.copy().sort_values(by="Date", ascending=False)st.dataframe(display_df[["Date", "Ticker", "Type", "Price", "Capital", "PnL", "Status"]], use_container_width=True)
+df_ledger = pd.concat([df_ledger, adj_row], ignore_index=True)
+# Sync capital shifts into performance graph data matrices tracks
+new_snapshot = pd.DataFrame([{"Date": adj_date, "Total_Net_Worth": new_portfolio_value}])
+df_equity = pd.concat([df_equity, new_snapshot], ignore_index=True)
+save_all(df_ledger, new_cash, df_equity)
+st.success(f"Balance adjustments updated successfully. New uninvested pool: ${new_cash:,.2f}")
+st.rerun()
+# ==============================================================================
+# 5. VIEW HISTORICAL TRANSACTION BOOK
+# ==============================================================================
+st.write("---")
+st.subheader("🗃️ Historical Transaction Logbook")
+if df_ledger.empty:st.write("No transaction data logged yet.")
+else:
+    display_df = df_ledger.copy().sort_values(by="Date", ascending=False)
+    st.dataframe(display_df[["Date", "Ticker", "Type", "Price", "Capital", "PnL", "Status"]], use_container_width=True)
