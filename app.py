@@ -22,9 +22,11 @@ def check_password():
         if app_mode == "Market Scanner":
             # Render Market Scanner interface
             st.write("Market Scanner Interface")
+            st.stop()
         elif app_mode == "Account Ledger":
             # Render Account Ledger interface
             st.write("Account Ledger Interface")
+            st.stop()
 
     else:
         st.error("❌ Invalid Access Token. Please try again.")
@@ -33,9 +35,6 @@ def check_password():
 if not st.session_state["authenticated"]:
     st.title("🔒 Secure Gateway Access")
     st.text_input("Enter Portfolio Password:", type="password", key="password_input", on_change=check_password)
-
-
-
     st.stop() # HALTS SCRIPT EXECUTION
 
 # ==============================================================================
