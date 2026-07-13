@@ -6,7 +6,7 @@ import plotly.graph_objects as gr
 from plotly.subplots import make_subplots
 
 # Set up mobile screen layout configuration
-st.set_page_config(page_title="AlgoScanner", layout="centered")
+st.set_page_config(page_title="Gebauer Stock Scanner", layout="centered")
 
 # 1. INITIALIZE LOGIN STATE TRACKING
 if "authenticated" not in st.session_state:
@@ -24,6 +24,15 @@ def check_password():
 if not st.session_state["authenticated"]:
     st.title("🔒 Secure Gateway Access")
     st.text_input("Enter Portfolio Password:", type="password", key="password_input", on_change=check_password)
+
+    app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
+    if app_mode == "Market Scanner":
+        # Render Market Scanner interface
+        pass
+    elif app_mode == "Account Ledger":
+        # Render Account Ledger interface
+        pass
+
     st.stop() # HALTS SCRIPT EXECUTION
 
 # ==============================================================================
@@ -31,7 +40,7 @@ if not st.session_state["authenticated"]:
 # ==============================================================================
 col_title, col_logout = st.columns([0.8, 0.2])
 with col_title:
-    st.title("📊 AlgoScanner Pro")
+    st.title("📊 Gebauer Stock Scanner")
 with col_logout:
     st.write("") 
     if st.button("🚪 Logout"):
