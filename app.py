@@ -17,6 +17,15 @@ def check_password():
     if st.session_state["password_input"] == st.secrets["APP_PASSWORD"]:
         st.session_state["authenticated"] = True
         del st.session_state["password_input"] # Clear password cache
+
+        app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
+        if app_mode == "Market Scanner":
+            # Render Market Scanner interface
+            st.write("Market Scanner Interface")
+        elif app_mode == "Account Ledger":
+            # Render Account Ledger interface
+            st.write("Account Ledger Interface")
+
     else:
         st.error("❌ Invalid Access Token. Please try again.")
 
@@ -25,13 +34,7 @@ if not st.session_state["authenticated"]:
     st.title("🔒 Secure Gateway Access")
     st.text_input("Enter Portfolio Password:", type="password", key="password_input", on_change=check_password)
 
-    app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
-    if app_mode == "Market Scanner":
-        # Render Market Scanner interface
-        st.write("Market Scanner Interface")
-    elif app_mode == "Account Ledger":
-        # Render Account Ledger interface
-        st.write("Account Ledger Interface")
+
 
     st.stop() # HALTS SCRIPT EXECUTION
 
