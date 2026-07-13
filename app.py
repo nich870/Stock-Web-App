@@ -17,17 +17,6 @@ def check_password():
     if st.session_state["password_input"] == st.secrets["APP_PASSWORD"]:
         st.session_state["authenticated"] = True
         del st.session_state["password_input"] # Clear password cache
-
-        app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
-        if app_mode == "Market Scanner":
-            # Render Market Scanner interface
-            st.write("Market Scanner Interface")
-            st.stop()
-        elif app_mode == "Account Ledger":
-            # Render Account Ledger interface
-            st.write("Account Ledger Interface")
-            st.stop()
-
     else:
         st.error("❌ Invalid Access Token. Please try again.")
 
@@ -48,6 +37,17 @@ with col_logout:
     if st.button("🚪 Logout"):
         st.session_state["authenticated"] = False
         st.rerun()
+
+app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
+if app_mode == "Market Scanner":
+    # Render Market Scanner interface
+    st.write("Market Scanner Interface")
+    st.stop()
+elif app_mode == "Account Ledger":
+    # Render Account Ledger interface
+    st.write("Account Ledger Interface")
+    st.stop()
+
 
 # User Input Array accessible directly from a mobile layout interface
 tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, NVDA")
