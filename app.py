@@ -201,7 +201,7 @@ elif app_mode == "Account Ledger":
     # 1. INITIALIZE LEDGER DATA STORAGE (Local Excel or CSV Matrix file)
     LEDGER_FILE = "trading_ledger.csv"
     BALANCE_FILE = "capital_balance.txt"
-    INITIAL_STARTING_CASH = 50000.00 # Change this to your actual starting account size
+    INITIAL_STARTING_CASH = 5000.00 # Change this to your actual starting account size
 
     def load_data():
         if os.path.exists(LEDGER_FILE):
@@ -262,7 +262,7 @@ elif app_mode == "Account Ledger":
             b_price = st.number_input("Actual Stock Buy Price ($):", min_value=0.01, step=0.01)
             b_capital = st.number_input("Total Money Invested ($):", min_value=1.00, step=100.00)
             
-            submit_buy = st.form_submit_with_button("Submit Position Entry")
+            submit_buy = st.form_submit_button("Submit Position Entry")
             
             if submit_buy:
                 if not b_ticker:
@@ -306,7 +306,7 @@ elif app_mode == "Account Ledger":
                 s_date = st.date_input("Liquidation Date", datetime.now().date())
                 s_price = st.number_input("Actual Stock Sell Price ($):", min_value=0.01, step=0.01)
                 
-                submit_sell = st.form_submit_with_button("Submit Position Liquidation")
+                submit_sell = st.form_submit_button("Submit Position Liquidation")
                 
                 if submit_sell:
                     # Calculate capital returns and trade mathematics
