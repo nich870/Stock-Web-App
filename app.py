@@ -411,3 +411,62 @@ elif app_mode == "Account Ledger":
     else:
         display_df = df_ledger.copy().sort_values(by="Date", ascending=False)
         st.dataframe(display_df[["Date", "Ticker", "Type", "Price", "Capital", "PnL", "Status"]], use_container_width=True)
+
+    # ==============================================================================
+    # 6. SYSTEM MAINTENANCE: SECURE MANAGEMENT UTILITIES
+    # ==============================================================================
+    st.write("---")
+    with st.expander("🛠️ Advanced System Utilities"):
+        
+        # --- SUBSECTION A: SECURE BACKUP DATA EXTRACTION ---
+        st.subheader("📥 Export Financial Records")
+        st.write("Download an off-site local backup copy of your transaction logs before performing any system updates.")
+        
+        if not df_ledger.empty:
+            # Convert the active dataframe memory matrix into a clean web string
+            csv_download_buffer = df_ledger.to_csv(index=False).encode('utf-8')
+            
+            # Native interactive mobile download button container
+            st.download_button(
+                label="💾 Download Ledger Backup (.CSV)",
+                data=csv_download_buffer,
+                file_name=f"ledger_backup_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        else:
+            st.info("No transaction data exists to generate a backup file.")
+            
+        st.write("---")
+        
+        # --- SUBSECTION B: LOCKED DESTRUCTIVE ERASE UTILITY ---
+        st.subheader("🔥 Hard System Reset")
+        st.warning("Deletes all ledger transaction sheets, equity growth graphs, and balance tracking streams.")
+        
+        # Requirement 1: Admin Master Key Validation Box
+        admin_key_input = st.text_input(
+            "Enter System Admin Master Key to unlock:", 
+            type="password", 
+            placeholder="Input developer override key..."
+        )
+        
+        # Pull the true secure secret string safely from your Streamlit Dashboard memory cache
+        if admin_key_input == st.secrets["ADMIN_KEY"]:
+            st.info("🔓 Admin Credentials Verified. Reset parameters unlocked.")
+            
+            # Requirement 2: Explicit Touch Safety Checkbox
+            confirm_wipe = st.checkbox("I verify that I want to completely delete my entire transaction history and reset my balance back to $50,000.00.")
+            
+            # Execute action block only if password is matching AND checkbox is checked
+            if st.button("🔥 Confirm Complete Data Erasure", disabled=not confirm_wipe, use_container_width=True):
+                try:
+                    for file_path in [LEDGER_FILE, BALANCE_FILE, EQUITY_HISTORY_FILE]:
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                    
+                    st.success("Database wiped successfully. Reloading baseline core portfolio settings...")
+                    st.rerun()
+                except Exception as e:
+                    st.error("System Error: Failed to cleanly decouple and erase infrastructure file logs.")
+        elif admin_key_input:
+            st.error("❌ Access Denied: Incorrect Admin Master Key.")
