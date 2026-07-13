@@ -28,10 +28,10 @@ if not st.session_state["authenticated"]:
     app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Account Ledger"])
     if app_mode == "Market Scanner":
         # Render Market Scanner interface
-        pass
+        st.write("Market Scanner Interface")
     elif app_mode == "Account Ledger":
         # Render Account Ledger interface
-        pass
+        st.write("Account Ledger Interface")
 
     st.stop() # HALTS SCRIPT EXECUTION
 
