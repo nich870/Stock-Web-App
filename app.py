@@ -5,6 +5,28 @@ import numpy as np
 import plotly.graph_objects as gr
 from plotly.subplots import make_subplots
 
+# Calculator for testing strategies
+def calculate_strategy_performance(data, initial_investment=1000.0):
+    """
+    Computes historical percent returns and cash compounding metrics 
+    for a baseline capital stake based on algorithmic position flags.
+    """
+    # 1. Calculate daily percentage change of the underlying stock asset
+    data["Market_Returns"] = data["Close"].pct_change()
+    
+    # 2. Shift the position flags by 1 day (You capture tomorrow's return based on tonight's signal)
+    data["Strategy_Returns"] = data["Market_Returns"] * data["Position"].shift(1)
+    
+    # 3. Mathematically compound the returns over the historical timeline matrix
+    data["Cumulative_Strategy"] = (1 + data["Strategy_Returns"].fillna(0)).cumprod()
+    
+    # 4. Extract the final compound output values
+    final_value = initial_investment * data["Cumulative_Strategy"].iloc[-1]
+    percent_return = (data["Cumulative_Strategy"].iloc[-1] - 1) * 100
+    
+    return percent_return, final_value
+
+
 # Set up mobile screen layout configuration
 st.set_page_config(page_title="Gebauer Stock Scanner", layout="centered")
 
@@ -136,10 +158,14 @@ if app_mode == "Market Scanner":
                     is_bull_market = pd.notna(latest["Long_Trend"]) and (latest["Close"] > latest["Long_Trend"])
                     regime_string = "Bull Market (Buying Allowed)" if is_bull_market else "Bear Market (Buying Locked)"
                     
+                    pct_return, final_dollar_worth = calculate_strategy_performance(data, initial_investment=1000.0)
+                    
                     summary_rows.append({
                         "Ticker": ticker, "Price": f"${latest['Close']:.2f}",
                         "RSI": f"{latest['RSI']:.1f}", "Regime": regime_string,
-                        "Signal": recommendation, "ATR Stop Target": stop_print
+                        "Signal": recommendation, "StructuralStop Target": stop_print,
+                        "Strategy Return %": f"{pct_return:+.1f}%", # <-- NEW PERFORMANCE COLUMN
+                        "$1,000 Growth Value": f"${final_dollar_worth:,.2f}" # <-- NEW PERFORMANCE COLUMN
                     })
                     
                     # 4. Render Mobile UI Container blocks
