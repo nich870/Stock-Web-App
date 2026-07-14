@@ -22,7 +22,7 @@ jobs:
       - name: Inject Core Machine Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas yfinance numpy
+          pip install -r requirements.txt
           
       - name: Execute Background Data Scan
         env:
