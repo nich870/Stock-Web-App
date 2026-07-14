@@ -16,7 +16,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 # 1. INITIALIZE DATA MATRIX & CONFIGURATIONS
-tickers = ["SPY", "AAPL", "MSFT", "GOOGL", "NVDA"]
+tickers = ["SPY", "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "AMD", "MU", "TSLA", "META", "AVGO"]
 summary_rows = []
 generated_images = []
 

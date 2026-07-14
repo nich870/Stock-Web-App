@@ -64,7 +64,7 @@ if app_mode == "Market Scanner":
     # User Input Array accessible directly from a mobile layout interface
     with col_title:
         st.title("📊 Gebauer Stock Scanner")
-    tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, NVDA")
+    tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, AMZN, NVDA, AMD, MU, TSLA, META, AVGO")
     tickers = [t.strip().upper() for t in tickers_input.split(",")]
 
     if st.button("⚡ Run Daily Market Scan"):
@@ -227,6 +227,10 @@ elif app_mode == "Account Ledger":
     EQUITY_HISTORY_FILE = "equity_history.csv"
     INITIAL_STARTING_CASH = 5000.00
 
+    DIVIDEND_DATABASE = {
+        "MSFT": 0.91, "AVGO": 0.65, "NVDA": 0.25, "AAPL": 0.25, "META": 0.50, "GOOGL": 0.20, "MU": 0.15
+    }
+
     def load_data():
         if os.path.exists(LEDGER_FILE):
             df = pd.read_csv(LEDGER_FILE)
@@ -268,6 +272,8 @@ elif app_mode == "Account Ledger":
     total_invested = open_positions["Capital"].sum()
     closed_positions = df_ledger[df_ledger["Status"] == "CLOSED"]
     net_realized_pnl = closed_positions["PnL"].sum()
+    dividend_rows = df_ledger[df_ledger["Type"] == "DIVIDEND"]
+    total_dividends_collected = dividend_rows["Capital"].sum()
     total_portfolio_value = current_cash + total_invested
 
     # Sync performance changes back to the performance chart logging system
@@ -281,14 +287,15 @@ elif app_mode == "Account Ledger":
     df_equity.to_csv(EQUITY_HISTORY_FILE, index=False)
 
     # Mobile-responsive financial scorecards
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("⚪ Uninvested Cash (Core Balance)", f"${current_cash:,.2f}")
         st.metric("🔵 Active Capital Deployed", f"${total_invested:,.2f}")
     with col2:
         st.metric("📈 Net Realized Profit/Loss", f"${net_realized_pnl:,.2f}", delta=f"{net_realized_pnl:+.2f}")
         st.metric("💼 Total Portfolio Net Worth", f"${total_portfolio_value:,.2f}")
-
+    with col3:
+        st.metric("💵 Total Dividends Collected", f"${total_dividends_collected:,.2f}", delta=f"+${total_dividends_collected:,.2f}" if total_dividends_collected > 0 else None)
     # ==============================================================================
     # 3. VISUAL PORTFOLIO PERFORMANCE LINE GRAPH CHART
     # ==============================================================================
@@ -366,25 +373,42 @@ elif app_mode == "Account Ledger":
             with st.form("sell_form", clear_on_submit=True):
                 s_date = st.date_input("Liquidation Date", datetime.now().date())
                 s_price = st.number_input("Actual Stock Sell Price ($):", min_value=0.01, step=0.01)
+
+                captured_dividend = st.checkbox("Did you hold this stock past its official Ex-dividend date during this trade?")
+
                 submit_sell = st.form_submit_button("Submit Position Liquidation")
                 
                 if submit_sell:
                     initial_capital = target_row["Capital"]
                     shares_held = target_row["Shares"]
+                    ticker_symbol = target_row["Ticker"]
                     final_liquidation_value = shares_held * s_price
                     trade_pnl = final_liquidation_value - initial_capital
-                    new_cash = current_cash + final_liquidation_value
+                    dividend_payout = 0.0
+                    if ticker_symbol in DIVIDEND_DATABASE and captured_dividend:
+                        dividend_payout = shares_held * DIVIDEND_DATABASE[ticker_symbol]
+
+
+                    new_cash = current_cash + final_liquidation_value + dividend_payout
                     
                     df_ledger.at[selected_idx, "PnL"] = trade_pnl
                     df_ledger.at[selected_idx, "Status"] = "CLOSED"
                     
                     exit_row = pd.DataFrame([{
-                        "ID": int(datetime.now().timestamp()), "Date": s_date, "Ticker": target_row["Ticker"],
+                        "ID": int(datetime.now().timestamp()), "Date": s_date, "Ticker": ticker_symbol,
                         "Type": "SELL", "Price": s_price, "Capital": final_liquidation_value,
                         "Shares": shares_held, "PnL": trade_pnl, "Status": "CLOSED"
                     }])
                     df_ledger = pd.concat([df_ledger, exit_row], ignore_index=True)
                     
+                    if dividend_payout > 0:
+                        dividend_row = pd.DataFrame([{
+                            "ID": int(datetime.now().timestamp()) + 1, "Date": s_date, "Ticker": "DIVIDEND",
+                            "Type": "DIVIDEND", "Price": DIVIDEND_DATABASE[ticker_symbol], "Capital": dividend_payout,
+                            "Shares": shares_held, "PnL": dividend_payout, "Status": "CLOSED"
+                        }])
+                        df_ledger = pd.concat([df_ledger, dividend_row], ignore_index=True)
+
                     # Append updated net worth path straight to performance plot array
                     new_snapshot = pd.DataFrame([{"Date": s_date, "Total_Net_Worth": new_cash + (total_invested - initial_capital)}])
                     df_equity = pd.concat([df_equity, new_snapshot], ignore_index=True)
