@@ -106,7 +106,7 @@ for ticker in tickers:
         fig.add_hline(y=70, line_dash="dot", line_color="red", row=2, col=1)
         fig.add_hline(y=30, line_dash="dot", line_color="green", row=2, col=1)
 
-        fig.add_hrect(y0=latest["Support"], y1=latest["Resistance"], fillcolor="purple", opacity=0.04, row=1, col=1)
+        fig.add_hrect(y0=latest["Support"], y1=latest["Resistance"], fillcolor="rgba(128, 0, 128, 0.08)", layer="above", line_width=0, row=1, col=1)
 
         fig.update_layout(height=350, width=600, showlegend=False, margin=dict(l=20, r=20, t=20, b=20))
         
