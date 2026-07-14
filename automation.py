@@ -95,8 +95,7 @@ for ticker in tickers:
         fig.add_trace(gr.Scatter(x=data.index, y=data["Close"], name="Price", line=dict(color="black")), row=1, col=1)
         fig.add_trace(gr.Scatter(x=data.index, y=data["Long_Trend"], name="200d SMA", line=dict(color="blue", width=1.5)), row=1, col=1)
         fig.add_trace(gr.Scatter(x=data.index, y=data["Stop_Line"], name="Stop Floor", line=dict(color="orange", width=2, dash="dot")), row=1, col=1)
-        fig.add_trace(gr.Scatter(x=data.index, y=data["Support"], name="Support", line=dict(color="green", dash="dash"), opacity=0.15), row=1, col=1)
-        fig.add_trace(gr.Scatter(x=data.index, y=data["Resistance"], name="Resistance", line=dict(color="red", dash="dash"), opacity=0.15), row=1, col=1)
+
         
         if not buy_signals.empty:
             fig.add_trace(gr.Scatter(x=buy_signals.index, y=buy_signals["Close"], mode="markers", name="BUY", marker=dict(color="limegreen", size=10)), row=1, col=1)
@@ -106,6 +105,10 @@ for ticker in tickers:
         fig.add_trace(gr.Scatter(x=data.index, y=data["RSI"], name="RSI", line=dict(color="purple")), row=2, col=1)
         fig.add_hline(y=70, line_dash="dot", line_color="red", row=2, col=1)
         fig.add_hline(y=30, line_dash="dot", line_color="green", row=2, col=1)
+
+        fig.add_hline(y=latest["Support"], line_dash="dash", line_color="green", opacity=0.3, row=1, col=1)
+        fig.add_hline(y=latest["Resistance"], line_dash="dash", line_color="red", opacity=0.3, row=1, col=1)
+
         fig.update_layout(height=350, width=600, showlegend=False, margin=dict(l=20, r=20, t=20, b=20))
         
         # Export chart image file locally inside the server instance sandbox
