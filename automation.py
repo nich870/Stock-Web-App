@@ -167,6 +167,7 @@ try:
     print("Full visual PDF briefing attachment transmitted successfully.")
 except Exception as e:
     print(f"SMTP Attachment Pipeline Error: {e}")
+    raise e
 
 # Clean up temporary server files
 for _, img_path in generated_images:
