@@ -63,7 +63,7 @@ app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Accou
 if app_mode == "Market Scanner":
     # User Input Array accessible directly from a mobile layout interface
     with col_title:
-        st.title("📊 Gebauer Stock Scanner")
+        st.title("📊 Stock MarketScanner")
     tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, AMZN, NVDA, AMD, MU, TSLA, META, AVGO")
     tickers = [t.strip().upper() for t in tickers_input.split(",")]
 
@@ -176,7 +176,7 @@ if app_mode == "Market Scanner":
                     if is_bull_market:
                         st.success(f"🟢 **Market Regime**: {ticker} is in a long-term **Bull Market**. Dip-buying strategies are active.")
                     else:
-                        st.error(f"⚠️ **Market Regime Alert**: {ticker} is in a structural **Bear Market**. Long-entry logic has been **paused** to prevent catching a falling knife.")
+                        st.error(f"⚠️ **Market Regime Alert**: {ticker} is in a structural **Bear Market**. Long-entry logic has been **paused** to prevent losses.")
                     
                     # Construct mobile-optimized charts using Plotly
                     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08, row_heights=[0.6, 0.4])
@@ -225,7 +225,7 @@ elif app_mode == "Account Ledger":
     LEDGER_FILE = "trading_ledger.csv"
     BALANCE_FILE = "capital_balance.txt"
     EQUITY_HISTORY_FILE = "equity_history.csv"
-    INITIAL_STARTING_CASH = 5000.00
+    INITIAL_STARTING_CASH = 1000.00
 
     DIVIDEND_DATABASE = {
         "MSFT": 0.91, "AVGO": 0.65, "NVDA": 0.25, "AAPL": 0.25, "META": 0.50, "GOOGL": 0.20, "MU": 0.15
@@ -266,7 +266,7 @@ elif app_mode == "Account Ledger":
     # ==============================================================================
     # 2. CALCULATE PORTFOLIO FINANCIAL BALANCES
     # ==============================================================================
-    st.title("📓 Private Trading Ledger Pro")
+    st.title("📓 Private Trading Ledger")
 
     open_positions = df_ledger[df_ledger["Status"] == "OPEN"]
     total_invested = open_positions["Capital"].sum()

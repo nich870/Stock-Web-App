@@ -120,7 +120,7 @@ for ticker in tickers:
 # ==============================================================================
 # 3. CONSTRUCT THE MULTI-PAGE PDF DOCUMENT
 # ==============================================================================
-pdf_filename = "Daily_Algo_Report.pdf"
+pdf_filename = "Daily_Stock_Report.pdf"
 doc = SimpleDocTemplate(pdf_filename, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
 styles = getSampleStyleSheet()
 
@@ -158,9 +158,9 @@ RECEIVER_EMAIL = os.environ.get("RECEIVER_EMAIL")
 msg = MIMEMultipart()
 msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
-msg['Subject'] = f"📁 Premium AlgoScanner PDF Report — {today_str}"
+msg['Subject'] = f"📁 Stock Scanner PDF Report — {today_str}"
 
-msg.attach(MIMEText(f"Greetings Nicholas,\n\nThe automated background data-science engine has completed your dual-daily market scan for your tracked asset portfolio array.\n\nPlease find your comprehensive technical document and high-resolution chart diagrams attached inside the compiled PDF file below.\n\nBest regards,\nAlgoScanner Terminal Bot", 'plain'))
+msg.attach(MIMEText(f"Greetings Nicholas,\n\nThe automated background data-science engine has completed your dual-daily market scan for your tracked asset portfolio array.\n\nPlease find your comprehensive technical document and high-resolution chart diagrams attached inside the compiled PDF file below.\n\nBest regards,\nStock Scanner Terminal Bot", 'plain'))
 
 # Prepare binary stream attachment mapping for the PDF document
 with open(pdf_filename, "rb") as attachment:
