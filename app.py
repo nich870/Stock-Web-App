@@ -122,7 +122,7 @@ if app_mode == "Market Scanner":
                         has_turned_up = c_price > p_price
                         
                         # Long buying signals are strictly forbidden if under the 200d trend line
-                        buy_trigger = is_oversold and has_turned_up # and is_trending_bullish
+                        buy_trigger = is_oversold and has_turned_up and is_trending_bullish
                         sell_trigger = (c_rsi > 70) or (c_price >= c_res * 0.99)
                         
                         if current_position == 0:
