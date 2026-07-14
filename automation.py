@@ -74,11 +74,20 @@ for ticker in tickers:
             data.iloc[i, data.columns.get_loc("Position")] = current_position
 
         latest = data.iloc[-1]
+        prev = data.iloc[-2]
         data["State_Shift"] = data["Position"].diff()
         buy_signals = data[data["State_Shift"] == 1]
         sell_signals = data[(data["State_Shift"] == -1) | ((data["Position"].shift(1) == 1) & (data["Position"] == 0))]
 
-        recommendation = "🟢 BUY SIGNAL" if latest["Position"] == 1 and data["Position"].iloc[-2] == 0 else ("🔵 HOLD LONG" if latest["Position"] == 1 else "⚪ CASH STATUS")
+        if latest["Position"] == 1 and prev["Position"] == 0:
+            recommendation = "🟢 BUY SIGNAL"
+        elif latest["Position"] == 0 and prev["Position"] == 1:
+            recommendation = "🔴 SELL TRIGGER"
+        elif latest["Position"] == 1:
+            recommendation = "🔵 HOLD LONG"
+        else:
+            recommendation = "⚪ CASH STATUS"
+
         summary_rows.append(f"<b>{ticker}</b>: {recommendation} (Price: ${latest['Close']:.2f} | RSI: {latest['RSI']:.1f})")
         
         # 2. GENERATE HEADLESS STATIC IMAGES OF CHARTS
@@ -86,6 +95,8 @@ for ticker in tickers:
         fig.add_trace(gr.Scatter(x=data.index, y=data["Close"], name="Price", line=dict(color="black")), row=1, col=1)
         fig.add_trace(gr.Scatter(x=data.index, y=data["Long_Trend"], name="200d SMA", line=dict(color="blue", width=1.5)), row=1, col=1)
         fig.add_trace(gr.Scatter(x=data.index, y=data["Stop_Line"], name="Stop Floor", line=dict(color="orange", width=2, dash="dot")), row=1, col=1)
+        fig.add_trace(gr.Scatter(x=data.index, y=data["Support"], name="Support", line=dict(color="green", dash="dash"), opacity=0.15), row=1, col=1)
+        fig.add_trace(gr.Scatter(x=data.index, y=data["Resistance"], name="Resistance", line=dict(color="red", dash="dash"), opacity=0.15), row=1, col=1)
         
         if not buy_signals.empty:
             fig.add_trace(gr.Scatter(x=buy_signals.index, y=buy_signals["Close"], mode="markers", name="BUY", marker=dict(color="limegreen", size=10)), row=1, col=1)
@@ -148,7 +159,7 @@ msg['From'] = SENDER_EMAIL
 msg['To'] = RECEIVER_EMAIL
 msg['Subject'] = f"📁 Premium AlgoScanner PDF Report — {today_str}"
 
-msg.attach(MIMEText(f"Greetings User,\n\nThe automated background data-science engine has completed your dual-daily market scan for your tracked asset portfolio array.\n\nPlease find your comprehensive technical document and high-resolution chart diagrams attached inside the compiled PDF file below.\n\nBest regards,\nAlgoScanner Terminal Bot", 'plain'))
+msg.attach(MIMEText(f"Greetings Nicholas,\n\nThe automated background data-science engine has completed your dual-daily market scan for your tracked asset portfolio array.\n\nPlease find your comprehensive technical document and high-resolution chart diagrams attached inside the compiled PDF file below.\n\nBest regards,\nAlgoScanner Terminal Bot", 'plain'))
 
 # Prepare binary stream attachment mapping for the PDF document
 with open(pdf_filename, "rb") as attachment:
