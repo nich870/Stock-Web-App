@@ -21,7 +21,7 @@ summary_rows = []
 generated_images = []
 
 # Fetch extended history to clear 200-day rolling calculations cushion
-raw_data = yf.download(tickers, start="2024-01-01")
+raw_data = yf.download(tickers, start="2024-01-01", group_by="ticker")
 
 for ticker in tickers:
     try:
