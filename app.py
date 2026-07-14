@@ -118,11 +118,11 @@ if app_mode == "Market Scanner":
                         # Safety Filter Check
                         is_trending_bullish = pd.notna(c_trend) and (c_price > c_trend)
                         
-                        is_oversold = (c_rsi < 35) or (c_price <= c_sup * 1.01)
+                        is_oversold = (c_rsi < 30) or (c_price <= c_sup * 1.01)
                         has_turned_up = c_price > p_price
                         
                         # Long buying signals are strictly forbidden if under the 200d trend line
-                        buy_trigger = is_oversold and has_turned_up and is_trending_bullish
+                        buy_trigger = is_oversold and is_trending_bullish # and has_turned_up
                         sell_trigger = (c_rsi > 70) or (c_price >= c_res * 0.99)
                         
                         if current_position == 0:
