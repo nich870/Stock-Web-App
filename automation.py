@@ -159,7 +159,7 @@ with open(pdf_filename, "rb") as attachment:
     msg.attach(part)
 
 try:
-    server = smtplib.SMTP('://gmail.com', 587)
+    server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
     server.login(SENDER_EMAIL, SENDER_PASSWORD)
     server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
