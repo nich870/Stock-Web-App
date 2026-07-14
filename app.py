@@ -225,7 +225,7 @@ elif app_mode == "Account Ledger":
     LEDGER_FILE = "trading_ledger.csv"
     BALANCE_FILE = "capital_balance.txt"
     EQUITY_HISTORY_FILE = "equity_history.csv"
-    INITIAL_STARTING_CASH = 1000.00
+    INITIAL_STARTING_CASH = 20.00
 
     DIVIDEND_DATABASE = {
         "MSFT": 0.91, "AVGO": 0.65, "NVDA": 0.25, "AAPL": 0.25, "META": 0.50, "GOOGL": 0.20, "MU": 0.15
@@ -501,7 +501,7 @@ elif app_mode == "Account Ledger":
             st.info("🔓 Admin Credentials Verified. Reset parameters unlocked.")
             
             # Requirement 2: Explicit Touch Safety Checkbox
-            confirm_wipe = st.checkbox("I verify that I want to completely delete my entire transaction history and reset my balance back to $5,000.00.")
+            confirm_wipe = st.checkbox("I verify that I want to completely delete my entire transaction history and reset my balance back to its original value.")
             
             # Execute action block only if password is matching AND checkbox is checked
             if st.button("🔥 Confirm Complete Data Erasure", disabled=not confirm_wipe, use_container_width=True):
