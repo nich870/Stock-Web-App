@@ -118,7 +118,7 @@ if app_mode == "Market Scanner":
                         # Safety Filter Check
                         is_trending_bullish = pd.notna(c_trend) and (c_price > c_trend)
                         
-                        is_oversold = (c_rsi < 30) and (c_price <= c_sup * 1.01)
+                        is_oversold = (c_rsi < 30) or (c_price <= c_sup * 1.01)
                         has_turned_up = c_price > p_price
                         
                         # Long buying signals are strictly forbidden if under the 200d trend line
