@@ -79,8 +79,8 @@ if app_mode == "Market Scanner":
                     if data.empty: continue
                     
                     # Math Indicators block (Support, Resistance, RSI, ATR)
-                    data["Support"] = data["Close"].rolling(window=90).min()
-                    data["Resistance"] = data["Close"].rolling(window=90).max()
+                    data["Support"] = data["Close"].rolling(window=100).min()
+                    data["Resistance"] = data["Close"].rolling(window=100).max()
                     
                     delta = data["Close"].diff()
                     gain = delta.where(delta > 0, 0.0)
