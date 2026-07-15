@@ -64,7 +64,7 @@ if app_mode == "Market Scanner":
     # User Input Array accessible directly from a mobile layout interface
     with col_title:
         st.title("📊 Stock MarketScanner")
-    tickers_input = st.text_input("Enter Tickers (comma separated):", "SPY, AAPL, MSFT, GOOGL, AMZN, NVDA, AMD, MU, TSLA, META, AVGO")
+    tickers_input = st.text_input("Enter Tickers (comma separated):", "VTI, XRP, NVDA, SPY, AAPL, MSFT, GOOGL, AMZN, AMD, MU, TSLA, META, AVGO")
     tickers = [t.strip().upper() for t in tickers_input.split(",")]
 
     if st.button("⚡ Run Daily Market Scan"):
@@ -532,7 +532,7 @@ elif app_mode == "Jacob's Account Ledger":
     LEDGER_FILE = "trading_ledger1.csv"
     BALANCE_FILE = "capital_balance1.txt"
     EQUITY_HISTORY_FILE = "equity_history1.csv"
-    INITIAL_STARTING_CASH = 20.00
+    INITIAL_STARTING_CASH = 1000.00
 
     DIVIDEND_DATABASE = {
         "MSFT": 0.91, "AVGO": 0.65, "NVDA": 0.25, "AAPL": 0.25, "META": 0.50, "GOOGL": 0.20, "MU": 0.15
