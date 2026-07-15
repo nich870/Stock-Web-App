@@ -79,8 +79,8 @@ if app_mode == "Market Scanner":
                     if data.empty: continue
                     
                     # Math Indicators block (Support, Resistance, RSI, ATR)
-                    data["Support"] = data["Close"].rolling(window=50).min()
-                    data["Resistance"] = data["Close"].rolling(window=50).max()
+                    data["Support"] = data["Close"].rolling(window=20).min()
+                    data["Resistance"] = data["Close"].rolling(window=20).max()
                     
                     delta = data["Close"].diff()
                     gain = delta.where(delta > 0, 0.0)
@@ -532,7 +532,7 @@ elif app_mode == "Jacob's Account Ledger":
     LEDGER_FILE = "trading_ledger1.csv"
     BALANCE_FILE = "capital_balance1.txt"
     EQUITY_HISTORY_FILE = "equity_history1.csv"
-    INITIAL_STARTING_CASH = 1000.00
+    INITIAL_STARTING_CASH = 100.00
 
     DIVIDEND_DATABASE = {
         "MSFT": 0.91, "AVGO": 0.65, "NVDA": 0.25, "AAPL": 0.25, "META": 0.50, "GOOGL": 0.20, "MU": 0.15
