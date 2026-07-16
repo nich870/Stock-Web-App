@@ -116,7 +116,7 @@ if app_mode == "Market Scanner":
                         is_trending_bullish = pd.notna(c_trend) and (c_p > c_trend)
                         
                         buy = (c_rsi < 30 or c_p <= c_sup * 1.01) and is_trending_bullish # and (c_p > p_p)
-                        sell = (c_rsi > 70 and c_p >= c_res * 0.99)
+                        sell = (c_rsi > 70 or c_p >= c_res * 0.99)
                         
                         if curr_pos == 0:
                             if buy:
@@ -189,7 +189,7 @@ if app_mode == "Market Scanner":
                         
                         # Long buying signals are strictly forbidden if under the 200d trend line
                         buy_trigger = is_oversold and is_trending_bullish # and has_turned_up
-                        sell_trigger = (c_rsi > 70) and (c_price >= c_res * 0.99)
+                        sell_trigger = (c_rsi > 70) or (c_price >= c_res * 0.99)
                         
                         if current_position == 0:
                             if buy_trigger:
