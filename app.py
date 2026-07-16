@@ -172,15 +172,25 @@ if app_mode == "Market Scanner":
                     data["Stop_Line"] = np.nan
                     current_position = 0
                     fixed_stop_floor = np.nan
+                    last_loss_date = None # Tracks the date of the last loss
                     
                     for i in range(1, len(data)):
+                        c_date = data.index[i]
                         c_price = data["Close"].iloc[i]
                         p_price = data["Close"].iloc[i - 1]
                         c_rsi = data["RSI"].iloc[i]
                         c_sup = data["Support"].iloc[i]
                         c_res = data["Resistance"].iloc[i]
                         c_trend = data["Long_Trend"].iloc[i]
-                        
+                    
+                        if last_loss_date is not None:
+                            days_since_loss = (c_date - last_loss_date).days
+                        else:
+                            days_since_loss = 999 # Infinite buffer if there has been no previous loss
+
+                        # Wash-Sale Safety Check: Locks buying if loss within 30 days
+                        is_wash_sale_risk = days_since_loss <= 30
+
                         # Safety Filter Check
                         is_trending_bullish = pd.notna(c_trend) and (c_price > c_trend)
                         
@@ -188,7 +198,7 @@ if app_mode == "Market Scanner":
                         has_turned_up = c_price > p_price
                         
                         # Long buying signals are strictly forbidden if under the 200d trend line
-                        buy_trigger = is_oversold and is_trending_bullish # and has_turned_up
+                        buy_trigger = is_oversold and is_trending_bullish and not is_wash_sale_risk # and has_turned_up
                         sell_trigger = (c_rsi > 70) or (c_price >= c_res * 0.99)
                         
                         if current_position == 0:
@@ -196,11 +206,14 @@ if app_mode == "Market Scanner":
                                 current_position = 1
                                 # Lock the stop floor to the 50 day rolling window minus 2%
                                 fixed_stop_floor = c_sup * 0.98
+                                entry_price = c_price
                         else:
                             data.iloc[i, data.columns.get_loc("Stop_Line")] = fixed_stop_floor
                             
                             if c_price <= fixed_stop_floor or sell_trigger:
                                 current_position = 0
+                                if c_price < entry_price:
+                                    last_loss_date = c_date
                                 
                         data.iloc[i, data.columns.get_loc("Position")] = current_position
 
@@ -215,6 +228,8 @@ if app_mode == "Market Scanner":
 
                     if latest["Position"] == 1 and prev["Position"] == 0: recommendation = "🟢 BUY"
                     elif latest["Position"] == 0 and prev["Position"] == 1: recommendation = "🔴 SELL (Exit)"
+                    elif latest["Position"] == 0 and is_wash_sale_risk:
+                        recommendation = "⚪ WASH SALE RISK"
                     elif latest["Position"] == 1: recommendation = "🔵 HOLD LONG"
                     else: recommendation = "⚪ CASH (Wait)"
                     
