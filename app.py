@@ -546,7 +546,7 @@ elif app_mode == "Nick's Account Ledger":
     st.subheader("🏛️ Tax-Loss Harvesting & Write-off Tracker")
 
     # 1. Isolate verified closed losses (Excluding cash adjustments and dividends)
-    closed_stock_trades = df_ledger[(df_ledger["Status"] == "CLOSED") & (df_ledger["Ticker"] != "CASH_ADJ") & (df_ledger["Ticker"] != "DIVIDEND")]
+    closed_stock_trades = df_ledger[(df_ledger["Status"] == "CLOSED") & (df_ledger["Ticker"] != "CASH_ADJ") & (df_ledger["Ticker"] != "DIVIDEND") & (df_ledger["Type"] == "BUY")]
     realized_losses = closed_stock_trades[closed_stock_trades["PnL"] < 0]
     total_harvested_losses = abs(realized_losses["PnL"].sum())
 
@@ -573,7 +573,7 @@ elif app_mode == "Nick's Account Ledger":
     # Display a clean, expandable warning table pinpointing exactly which trades generated your tax write-offs
     if not realized_losses.empty:
         with st.expander("📋 Review Active Loss Deductions (Form 1099-B Audit)"):
-            st.dataframe(realized_losses[["Date", "Ticker", "Capital", "PnL"]], use_container_width=True)
+            st.dataframe(realized_losses[["Date", "Ticker", "PnL"]], use_container_width=True)
 
     # ==============================================================================
     # 6. SYSTEM MAINTENANCE: SECURE MANAGEMENT UTILITIES
