@@ -399,7 +399,7 @@ elif app_mode == "Nick's Account Ledger":
     df_equity.to_csv(EQUITY_HISTORY_FILE, index=False)
 
     # Mobile-responsive financial scorecards
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("⚪ Uninvested Cash (Core Balance)", f"${current_cash:,.2f}")
         st.metric("🔵 Active Capital Deployed", f"${total_invested:,.2f}")
@@ -408,6 +408,8 @@ elif app_mode == "Nick's Account Ledger":
         st.metric("💼 Total Portfolio Net Worth", f"${total_portfolio_value:,.2f}")
     with col3:
         st.metric("💵 Total Dividends Collected", f"${total_dividends_collected:,.2f}", delta=f"+${total_dividends_collected:,.2f}" if total_dividends_collected > 0 else None)
+    with col4:
+        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}")
     # ==============================================================================
     # 3. VISUAL PORTFOLIO PERFORMANCE LINE GRAPH CHART
     # ==============================================================================
