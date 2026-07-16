@@ -409,7 +409,7 @@ elif app_mode == "Nick's Account Ledger":
     with col3:
         st.metric("💵 Total Dividends Collected", f"${total_dividends_collected:,.2f}", delta=f"+${total_dividends_collected:,.2f}" if total_dividends_collected > 0 else None)
     with col4:
-        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}", help="Estimated 16% short-term capital gains tax liability on realized profits.\nMore information below in Tax Loss Harvesting section.")
+        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}", help="Using 16% short-term capital gains tax estimate.")
     # ==============================================================================
     # 3. VISUAL PORTFOLIO PERFORMANCE LINE GRAPH CHART
     # ==============================================================================
@@ -598,7 +598,7 @@ elif app_mode == "Nick's Account Ledger":
     t_col1, t_col2 = st.columns(2)
     with t_col1:
         st.metric("📉 Total Harvested Capital Losses", f"${total_harvested_losses:,.2f}", delta="- Tax Deduction", delta_color="inverse")
-        st.metric("🛡️ Ordinary Income Offset Value", f"${ordinary_income_offset:,.2f}", help="IRS limit: Up to $3,000 of excess capital losses can write off your standard W-2 salary income.")
+        st.metric("🛡️ Ordinary Income Offset Value", f"${ordinary_income_offset:,.2f}", help="Up to $3,000 of excess capital losses written off standard W-2 income.")
     with t_col2:
         st.metric("⚖️ Net Taxable Short-Term Gains", f"${taxable_net_gains:,.2f}")
         st.metric("💵 Estimated Cash Tax Savings", f"${estimated_tax_savings:,.2f}", delta="+ Saved Core Cash")
