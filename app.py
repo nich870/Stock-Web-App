@@ -382,7 +382,7 @@ elif app_mode == "Nick's Account Ledger":
     
     open_positions = df_ledger[df_ledger["Status"] == "OPEN"]
     total_invested = open_positions["Capital"].sum()
-    closed_positions = df_ledger[df_ledger["Status"] == "CLOSED"]
+    closed_positions = df_ledger[(df_ledger["Status"] == "CLOSED") & (df_ledger["Type"] == "SELL")]
     net_realized_pnl = closed_positions["PnL"].sum()
     dividend_rows = df_ledger[df_ledger["Type"] == "DIVIDEND"]
     total_dividends_collected = dividend_rows["Capital"].sum()
