@@ -559,7 +559,7 @@ elif app_mode == "Nick's Account Ledger":
         taxable_net_gains = 0.0
         ordinary_income_offset = min(3000.0, total_harvested_losses)
 
-    estimated_tax_savings = (total_harvested_losses if net_realized_pnl > total_harvested_losses else net_realized_pnl) * 0.26
+    estimated_tax_savings = (total_harvested_losses if net_realized_pnl > total_harvested_losses else net_realized_pnl) * 0.16
 
     # 3. Render mobile-optimized tax accounting grid layout
     t_col1, t_col2 = st.columns(2)
