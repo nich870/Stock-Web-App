@@ -112,8 +112,10 @@ for ticker in tickers:
         data["Stop_Line"] = np.nan
         current_position = 0
         fixed_stop_floor = np.nan
+        last_loss_date = None # Tracks date of last loss
         
         for i in range(1, len(data)):
+            c_date = data.index[i]
             c_price = data["Close"].iloc[i]
             p_price = data["Close"].iloc[i - 1]
             c_rsi = data["RSI"].iloc[i]
@@ -121,21 +123,31 @@ for ticker in tickers:
             c_res = data["Resistance"].iloc[i]
             c_trend = data["Long_Trend"].iloc[i]
             
+            if last_loss_date is not None:
+                days_since_loss =(c_date - last_loss_date).days
+            else:
+                days_since_loss = 999 # Infinite Buffer if no prior loss
+
+            is_wash_sale_risk = days_since_loss <= 30
+
             is_trending = (c_price > c_trend)
             turned_up = (c_price > p_price)
             is_oversold = (c_rsi < 30) or (c_price <= c_sup * 1.01)
             
-            buy_trigger = is_oversold and is_trending # and turned_up 
+            buy_trigger = is_oversold and is_trending and not is_wash_sale_risk # and turned_up 
             sell_trigger = (c_rsi > 70) or (c_price >= c_res * 0.99)
             
             if current_position == 0:
                 if buy_trigger:
                     current_position = 1
                     fixed_stop_floor = c_sup * 0.98
+                    entry_price = c_price
             else:
                 data.iloc[i, data.columns.get_loc("Stop_Line")] = fixed_stop_floor
                 if c_price <= fixed_stop_floor or sell_trigger:
                     current_position = 0
+                    if c_price < entry_price:
+                        last_loss_date = c_date
                     
             data.iloc[i, data.columns.get_loc("Position")] = current_position
 
@@ -149,6 +161,8 @@ for ticker in tickers:
             recommendation = "🟢 BUY SIGNAL"
         elif latest["Position"] == 0 and prev["Position"] == 1:
             recommendation = "🔴 SELL TRIGGER"
+        elif latest["Position"] == 0 and is_wash_sale_risk:
+            recommendation = "🟡 WASH SALE RISK"
         elif latest["Position"] == 1:
             recommendation = "🔵 HOLD LONG"
         else:

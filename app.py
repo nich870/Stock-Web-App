@@ -229,7 +229,7 @@ if app_mode == "Market Scanner":
                     if latest["Position"] == 1 and prev["Position"] == 0: recommendation = "🟢 BUY"
                     elif latest["Position"] == 0 and prev["Position"] == 1: recommendation = "🔴 SELL (Exit)"
                     elif latest["Position"] == 0 and is_wash_sale_risk:
-                        recommendation = "⚪ WASH SALE RISK"
+                        recommendation = "🟡 WASH SALE RISK"
                     elif latest["Position"] == 1: recommendation = "🔵 HOLD LONG"
                     else: recommendation = "⚪ CASH (Wait)"
                     
@@ -409,7 +409,7 @@ elif app_mode == "Nick's Account Ledger":
     with col3:
         st.metric("💵 Total Dividends Collected", f"${total_dividends_collected:,.2f}", delta=f"+${total_dividends_collected:,.2f}" if total_dividends_collected > 0 else None)
     with col4:
-        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}", help="Using 16% short-term capital gains tax estimate.")
+        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}" if net_realized_pnl * 0.16 > 0 else None, help="Using 16% short-term capital gains tax estimate.")
     # ==============================================================================
     # 3. VISUAL PORTFOLIO PERFORMANCE LINE GRAPH CHART
     # ==============================================================================
@@ -598,7 +598,7 @@ elif app_mode == "Nick's Account Ledger":
     t_col1, t_col2 = st.columns(2)
     with t_col1:
         st.metric("📉 Total Harvested Capital Losses", f"${total_harvested_losses:,.2f}", delta="- Tax Deduction", delta_color="inverse")
-        st.metric("🛡️ Ordinary Income Offset Value", f"${ordinary_income_offset:,.2f}", help="Up to $3,000 of excess capital losses written off standard W-2 income.")
+        st.metric("🛡️ Ordinary Income Offset Value", f"${ordinary_income_offset:,.2f}", help="$3,000 max that can be written off standard W-2 income.")
     with t_col2:
         st.metric("⚖️ Net Taxable Short-Term Gains", f"${taxable_net_gains:,.2f}")
         st.metric("💵 Estimated Cash Tax Savings", f"${estimated_tax_savings:,.2f}", delta="+ Saved Core Cash")
@@ -725,9 +725,42 @@ elif app_mode == "Jacob's Account Ledger":
     # ==============================================================================
     st.title("📓 Jacob's Private Trading Ledger")
 
+
+    # ==============================================================================
+    # TAX QUARTER DEADLINE MONITOR (IRS Form 1040-ES Framework)
+    # ==============================================================================
+    current_date = datetime.now().date()
+    current_year = current_date.year
+
+    # Official IRS Deadline Arrays
+    deadlines = [
+        {"Quarter": "Q1", "Date": datetime(current_year, 4, 15).date(), "Voucher": "Voucher 1"},
+        {"Quarter": "Q2", "Date": datetime(current_year, 6, 15).date(), "Voucher": "Voucher 2"},
+        {"Quarter": "Q3", "Date": datetime(current_year, 9, 15).date(), "Voucher": "Voucher 3"},
+        {"Quarter": "Q4", "Date": datetime(current_year + 1, 1, 15).date(), "Voucher": "Voucher 4"}
+    ]
+
+    # Identify the upcoming deadline milestone row
+    upcoming_deadline = None
+    for d in deadlines:
+        if current_date <= d["Date"]:
+            upcoming_deadline = d
+            break
+
+    if upcoming_deadline:
+        days_remaining = (upcoming_deadline["Date"] - current_date).days
+        deadline_str = upcoming_deadline["Date"].strftime("%B %d, %Y")
+        
+        # Render dynamic, touchscreen-friendly calendar warning callouts
+        if days_remaining <= 14:
+            st.error(f"🚨 **🚨 DANGER: IRS TAX DEADLINE CRITICAL** — Your **{upcoming_deadline['Quarter']} ({upcoming_deadline['Voucher']})** estimated tax voucher payment is due in exactly **{days_remaining} days** ({deadline_str}). Move your calculated tax reserve cache out of your broker account immediately.")
+        else:
+            st.info(f"📅 **Tax Calendar Reminder**: The next estimated IRS payment deadline is for **{upcoming_deadline['Quarter']}** in **{days_remaining} days** ({deadline_str}).")
+
+
     open_positions = df_ledger[df_ledger["Status"] == "OPEN"]
     total_invested = open_positions["Capital"].sum()
-    closed_positions = df_ledger[df_ledger["Status"] == "CLOSED"]
+    closed_positions = df_ledger[df_ledger["Status"] == "CLOSED" & (df_ledger["Type"] == "SELL")]
     net_realized_pnl = closed_positions["PnL"].sum()
     dividend_rows = df_ledger[df_ledger["Type"] == "DIVIDEND"]
     total_dividends_collected = dividend_rows["Capital"].sum()
@@ -744,7 +777,7 @@ elif app_mode == "Jacob's Account Ledger":
     df_equity.to_csv(EQUITY_HISTORY_FILE, index=False)
 
     # Mobile-responsive financial scorecards
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("⚪ Uninvested Cash (Core Balance)", f"${current_cash:,.2f}")
         st.metric("🔵 Active Capital Deployed", f"${total_invested:,.2f}")
@@ -753,6 +786,8 @@ elif app_mode == "Jacob's Account Ledger":
         st.metric("💼 Total Portfolio Net Worth", f"${total_portfolio_value:,.2f}")
     with col3:
         st.metric("💵 Total Dividends Collected", f"${total_dividends_collected:,.2f}", delta=f"+${total_dividends_collected:,.2f}" if total_dividends_collected > 0 else None)
+    with col4:
+        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}" if net_realized_pnl * 0.16 > 0 else None, help="Using 16% short-term capital gains tax estimate.")
     # ==============================================================================
     # 3. VISUAL PORTFOLIO PERFORMANCE LINE GRAPH CHART
     # ==============================================================================
@@ -914,6 +949,43 @@ elif app_mode == "Jacob's Account Ledger":
     else:
         display_df = df_ledger.copy().sort_values(by="Date", ascending=False)
         st.dataframe(display_df[["Date", "Ticker", "Type", "Price", "Capital", "PnL", "Status"]], use_container_width=True)
+
+    # ==============================================================================
+    # 5b. TAX-LOSS HARVESTING & DEDUCTION ANALYTICS
+    # ==============================================================================
+    st.write("---")
+    st.subheader("🏛️ Tax-Loss Harvesting & Write-off Tracker")
+
+    # 1. Isolate verified closed losses (Excluding cash adjustments and dividends)
+    closed_stock_trades = df_ledger[(df_ledger["Status"] == "CLOSED") & (df_ledger["Ticker"] != "CASH_ADJ") & (df_ledger["Ticker"] != "DIVIDEND") & (df_ledger["Type"] == "BUY")]
+    gross_gains = closed_stock_trades[closed_stock_trades["PnL"] > 0]["PnL"].sum()
+    total_harvested_losses = abs(closed_stock_trades[closed_stock_trades["PnL"] < 0]["PnL"].sum())
+
+    # 2. Calculate the IRS writing-off limits
+    # The IRS allows you to offset 100% of capital gains, plus up to $3,000 of ordinary income
+    if gross_gains > total_harvested_losses:
+        taxable_net_gains = max(0.0, gross_gains - total_harvested_losses)
+        ordinary_income_offset = 0.0
+    else:
+        taxable_net_gains = 0.0
+        ordinary_income_offset = min(3000.0, total_harvested_losses - gross_gains)
+
+    estimated_tax_savings = total_harvested_losses * 0.16
+
+    # 3. Render mobile-optimized tax accounting grid layout
+    t_col1, t_col2 = st.columns(2)
+    with t_col1:
+        st.metric("📉 Total Harvested Capital Losses", f"${total_harvested_losses:,.2f}", delta="- Tax Deduction", delta_color="inverse")
+        st.metric("🛡️ Ordinary Income Offset Value", f"${ordinary_income_offset:,.2f}", help="$3,000 max that can be written off standard W-2 income.")
+    with t_col2:
+        st.metric("⚖️ Net Taxable Short-Term Gains", f"${taxable_net_gains:,.2f}")
+        st.metric("💵 Estimated Cash Tax Savings", f"${estimated_tax_savings:,.2f}", delta="+ Saved Core Cash")
+
+    # Display a clean, expandable warning table pinpointing exactly which trades generated your tax write-offs
+    if not closed_stock_trades.empty:
+        with st.expander("📋 Review Active Loss Deductions (Form 1099-B Audit)"):
+            st.dataframe(closed_stock_trades[closed_stock_trades["PnL"] < 0][["Date", "Ticker", "PnL"]], use_container_width=True)
+
 
     # ==============================================================================
     # 6. SYSTEM MAINTENANCE: SECURE MANAGEMENT UTILITIES
