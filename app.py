@@ -547,19 +547,19 @@ elif app_mode == "Nick's Account Ledger":
 
     # 1. Isolate verified closed losses (Excluding cash adjustments and dividends)
     closed_stock_trades = df_ledger[(df_ledger["Status"] == "CLOSED") & (df_ledger["Ticker"] != "CASH_ADJ") & (df_ledger["Ticker"] != "DIVIDEND") & (df_ledger["Type"] == "BUY")]
-    realized_losses = closed_stock_trades[closed_stock_trades["PnL"] < 0]
-    total_harvested_losses = abs(realized_losses["PnL"].sum())
+    gross_gains = closed_stock_trades[closed_stock_trades["PnL"] > 0]["PnL"].sum()
+    total_harvested_losses = abs(closed_stock_trades[closed_stock_trades["PnL"] < 0]["PnL"].sum())
 
     # 2. Calculate the IRS writing-off limits
     # The IRS allows you to offset 100% of capital gains, plus up to $3,000 of ordinary income
-    if net_realized_pnl > 0:
-        taxable_net_gains = max(0.0, net_realized_pnl - total_harvested_losses)
-        ordinary_income_offset = min(3000.0, max(0.0, total_harvested_losses - net_realized_pnl))
+    if gross_gains > total_harvested_losses:
+        taxable_net_gains = max(0.0, gross_gains - total_harvested_losses)
+        ordinary_income_offset = 0.0
     else:
         taxable_net_gains = 0.0
-        ordinary_income_offset = min(3000.0, total_harvested_losses)
+        ordinary_income_offset = min(3000.0, total_harvested_losses - gross_gains)
 
-    estimated_tax_savings = (total_harvested_losses if net_realized_pnl > total_harvested_losses else net_realized_pnl) * 0.16
+    estimated_tax_savings = total_harvested_losses * 0.16
 
     # 3. Render mobile-optimized tax accounting grid layout
     t_col1, t_col2 = st.columns(2)
@@ -571,9 +571,9 @@ elif app_mode == "Nick's Account Ledger":
         st.metric("💵 Estimated Cash Tax Savings", f"${estimated_tax_savings:,.2f}", delta="+ Saved Core Cash")
 
     # Display a clean, expandable warning table pinpointing exactly which trades generated your tax write-offs
-    if not realized_losses.empty:
+    if not closed_stock_trades.empty:
         with st.expander("📋 Review Active Loss Deductions (Form 1099-B Audit)"):
-            st.dataframe(realized_losses[["Date", "Ticker", "PnL"]], use_container_width=True)
+            st.dataframe(closed_stock_trades[closed_stock_trades["PnL"] < 0][["Date", "Ticker", "PnL"]], use_container_width=True)
 
     # ==============================================================================
     # 6. SYSTEM MAINTENANCE: SECURE MANAGEMENT UTILITIES
