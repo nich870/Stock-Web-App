@@ -108,7 +108,7 @@ if app_mode == "Market Scanner":
                         c_sup = sim["Support"].iloc[i]
                         c_res = sim["Resistance"].iloc[i]
                         
-                        buy = (c_rsi < 30 or c_p <= c_sup * 1.01) # and (c_p > p_p)
+                        buy = (c_rsi < 30 or c_p <= c_sup * 1.01) and (c_p > p_p)
                         sell = (c_rsi > 70 or c_p >= c_res * 0.99)
                         
                         if curr_pos == 0:
