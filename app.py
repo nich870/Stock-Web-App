@@ -350,19 +350,20 @@ elif app_mode == "Nick's Account Ledger":
     st.title("📓 Nick's Private Trading Ledger")
 
     # ==============================================================================
-    # TAX QUARTER DEADLINE MONITOR & VOUCHER CALCULATOR (IRS Form 1040-ES)
+    # TAX QUARTER DEADLINE MONITOR (IRS Form 1040-ES Framework)
     # ==============================================================================
     current_date = datetime.now().date()
     current_year = current_date.year
 
-    # 1. Define the official IRS fiscal date matrices boundaries
+    # Official IRS Deadline Arrays
     deadlines = [
-        {"Quarter": "Q1", "Start": datetime(current_year, 1, 1).date(), "End": datetime(current_year, 3, 31).date(), "Date": datetime(current_year, 4, 15).date(), "Voucher": "Voucher 1"},
-        {"Quarter": "Q2", "Start": datetime(current_year, 4, 1).date(), "End": datetime(current_year, 5, 31).date(), "Date": datetime(current_year, 6, 15).date(), "Voucher": "Voucher 2"},
-        {"Quarter": "Q3", "Start": datetime(current_year, 6, 1).date(), "End": datetime(current_year, 8, 31).date(), "Date": datetime(current_year, 9, 15).date(), "Voucher": "Voucher 3"},
-        {"Quarter": "Q4", "Start": datetime(current_year, 9, 1).date(), "End": datetime(current_year, 12, 31).date(), "Date": datetime(current_year + 1, 1, 15).date(), "Voucher": "Voucher 4"}
+        {"Quarter": "Q1", "Date": datetime(current_year, 4, 15).date(), "Voucher": "Voucher 1"},
+        {"Quarter": "Q2", "Date": datetime(current_year, 6, 15).date(), "Voucher": "Voucher 2"},
+        {"Quarter": "Q3", "Date": datetime(current_year, 9, 15).date(), "Voucher": "Voucher 3"},
+        {"Quarter": "Q4", "Date": datetime(current_year + 1, 1, 15).date(), "Voucher": "Voucher 4"}
     ]
 
+    # Identify the upcoming deadline milestone row
     upcoming_deadline = None
     for d in deadlines:
         if current_date <= d["Date"]:
@@ -373,56 +374,11 @@ elif app_mode == "Nick's Account Ledger":
         days_remaining = (upcoming_deadline["Date"] - current_date).days
         deadline_str = upcoming_deadline["Date"].strftime("%B %d, %Y")
         
-        # Render dynamic, touchscreen-friendly calendar alerts
+        # Render dynamic, touchscreen-friendly calendar warning callouts
         if days_remaining <= 14:
-            st.error(f"🚨 **DEADLINE CRITICAL** — Your **{upcoming_deadline['Quarter']} ({upcoming_deadline['Voucher']})** estimated tax payment is due in **{days_remaining} days** ({deadline_str}).")
+            st.error(f"🚨 **🚨 DANGER: IRS TAX DEADLINE CRITICAL** — Your **{upcoming_deadline['Quarter']} ({upcoming_deadline['Voucher']})** estimated tax voucher payment is due in exactly **{days_remaining} days** ({deadline_str}). Move your calculated tax reserve cache out of your broker account immediately.")
         else:
-            st.info(f"📅 **Tax Calendar**: Next IRS payment deadline is for **{upcoming_deadline['Quarter']}** in **{days_remaining} days** ({deadline_str}).")
-        
-        # 2. VOUCHER DOLLAR CALCULATOR ENGINE
-        # Filter closed stock and dividend rows that occurred strictly inside this specific quarter's date range
-        if not df_ledger.empty:
-            # Convert ledger date array to comparable formats
-            df_ledger["Date_Parsed"] = pd.to_datetime(df_ledger["Date"]).dt.date
-            
-            quarter_trades = df_ledger[
-                (df_ledger["Date_Parsed"] >= upcoming_deadline["Start"]) & 
-                (df_ledger["Date_Parsed"] <= upcoming_deadline["End"]) & 
-                (df_ledger["Ticker"] != "CASH_ADJ") & 
-                (df_ledger["Status"] == "CLOSED")
-            ]
-            
-            # Calculate net trading performance for this specific period
-            quarter_net_pnl = quarter_trades["PnL"].sum()
-        else:
-            quarter_net_pnl = 0.0
-
-        # Apply your conservative 26% Arkansas state + Federal bracket footprint
-        ESTIMATED_TAX_RATE = 0.26
-        
-        if quarter_net_pnl > 0:
-            voucher_check_amount = quarter_net_pnl * ESTIMATED_TAX_RATE
-        else:
-            voucher_check_amount = 0.0
-
-        # 3. RENDER THE INTERACTIVE CHECK PRESENTATION BOX
-        with st.container():
-            st.markdown(
-                f"""
-                <div style="background-color:#F5F5DC; border-radius:10px; padding:15px; border: 2px dashed #BDB76B; margin-bottom: 20px;">
-                    <h4 style="color:#4B5320; margin-top:0;">📝 IRS Form 1040-ES Check Generator</h4>
-                    <p style="color:#1A1A1A; font-size:14px; margin-bottom:5px;"><b>Quarter Covered</b>: {upcoming_deadline['Quarter']} Matrix Stream ({upcoming_deadline['Start'].strftime('%b %d')} to {upcoming_deadline['End'].strftime('%b %d')})</p>
-                    <p style="color:#1A1A1A; font-size:14px; margin-bottom:12px;"><b>Net Performance in Window</b>: <span style="color:{'green' if quarter_net_pnl >= 0 else 'red'}; font-weight:bold;">${quarter_net_pnl:+,.2f}</span></p>
-                    <div style="background-color:#FFFFFF; border: 1px solid #CCCCCC; padding:10px; border-radius:5px; text-align:center;">
-                        <span style="font-size:12px; color:#666666; uppercase">PAY TO THE ORDER OF: Internal Revenue Service</span><br>
-                        <span style="font-size:24px; font-weight:bold; color:#1E5631;">$ {voucher_check_amount:,.2f}</span><br>
-                        <span style="font-size:14px; font-weight:bold; color:#333333;">{upcoming_deadline['Voucher']} Estimated Tax Payment</span>
-                    </div>
-                </div>
-                """, 
-                unsafe_allow_url_encoded=True, # Supports markdown style layouts
-                unsafe_allow_html=True
-            )
+            st.info(f"📅 **Tax Calendar Reminder**: The next estimated IRS payment deadline is for **{upcoming_deadline['Quarter']}** in **{days_remaining} days** ({deadline_str}).")
     
     open_positions = df_ledger[df_ledger["Status"] == "OPEN"]
     total_invested = open_positions["Capital"].sum()
