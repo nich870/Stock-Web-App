@@ -116,7 +116,7 @@ if app_mode == "Market Scanner":
                         is_trending_bullish = pd.notna(c_trend) and (c_p > c_trend)
                         
                         buy = (c_rsi < 30 or c_p <= c_sup * 1.01) and is_trending_bullish # and (c_p > p_p)
-                        sell = (c_rsi > 70 or c_p >= c_res * 0.99)
+                        sell = (c_rsi > 70 and c_p >= c_res * 0.99)
                         
                         if curr_pos == 0:
                             if buy:
