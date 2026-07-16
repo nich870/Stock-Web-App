@@ -349,6 +349,37 @@ elif app_mode == "Nick's Account Ledger":
     # ==============================================================================
     st.title("📓 Nick's Private Trading Ledger")
 
+    # ==============================================================================
+    # TAX QUARTER DEADLINE MONITOR (IRS Form 1040-ES Framework)
+    # ==============================================================================
+    current_date = datetime.now().date()
+    current_year = current_date.year
+
+    # Official IRS Deadline Arrays
+    deadlines = [
+        {"Quarter": "Q1", "Date": datetime(current_year, 4, 15).date(), "Voucher": "Voucher 1"},
+        {"Quarter": "Q2", "Date": datetime(current_year, 6, 15).date(), "Voucher": "Voucher 2"},
+        {"Quarter": "Q3", "Date": datetime(current_year, 9, 15).date(), "Voucher": "Voucher 3"},
+        {"Quarter": "Q4", "Date": datetime(current_year + 1, 1, 15).date(), "Voucher": "Voucher 4"}
+    ]
+
+    # Identify the upcoming deadline milestone row
+    upcoming_deadline = None
+    for d in deadlines:
+        if current_date <= d["Date"]:
+            upcoming_deadline = d
+            break
+
+    if upcoming_deadline:
+        days_remaining = (upcoming_deadline["Date"] - current_date).days
+        deadline_str = upcoming_deadline["Date"].strftime("%B %d, %Y")
+        
+        # Render dynamic, touchscreen-friendly calendar warning callouts
+        if days_remaining <= 14:
+            st.error(f"🚨 **🚨 DANGER: IRS TAX DEADLINE CRITICAL** — Your **{upcoming_deadline['Quarter']} ({upcoming_deadline['Voucher']})** estimated tax voucher payment is due in exactly **{days_remaining} days** ({deadline_str}). Move your calculated tax reserve cache out of your broker account immediately.")
+        else:
+            st.info(f"📅 **Tax Calendar Reminder**: The next estimated IRS payment deadline is for **{upcoming_deadline['Quarter']}** in **{days_remaining} days** ({deadline_str}).")
+    
     open_positions = df_ledger[df_ledger["Status"] == "OPEN"]
     total_invested = open_positions["Capital"].sum()
     closed_positions = df_ledger[df_ledger["Status"] == "CLOSED"]
