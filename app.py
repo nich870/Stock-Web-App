@@ -86,6 +86,10 @@ if app_mode == "Market Scanner":
                 if len(train_df) < 100:
                     return best_window
 
+                stock_df_copy = stock_df.copy()
+                stock_df_copy["Long_Trend"] = stock_df_copy["Close"].rolling(window=200).mean()
+                train_df["Long_Trend"] = stock_df_copy["Long_Trend"].loc[train_df.index]
+
                 # Scan the parameter spectrum using a 5-day stride for robustness
                 for test_w in range(30, 121, 5):
                     sim = train_df.copy()
@@ -107,8 +111,11 @@ if app_mode == "Market Scanner":
                         c_rsi = sim["RSI"].iloc[i]
                         c_sup = sim["Support"].iloc[i]
                         c_res = sim["Resistance"].iloc[i]
+                        c_trend = sim["Long_Trend"].iloc[i]
+
+                        is_trending_bullish = pd.notna(c_trend) and (c_p > c_trend)
                         
-                        buy = (c_rsi < 30 or c_p <= c_sup * 1.01) and (c_p > p_p)
+                        buy = (c_rsi < 30 or c_p <= c_sup * 1.01) and is_trending_bullish # and (c_p > p_p)
                         sell = (c_rsi > 70 or c_p >= c_res * 0.99)
                         
                         if curr_pos == 0:
@@ -181,7 +188,7 @@ if app_mode == "Market Scanner":
                         has_turned_up = c_price > p_price
                         
                         # Long buying signals are strictly forbidden if under the 200d trend line
-                        buy_trigger = is_oversold and is_trending_bullish and has_turned_up
+                        buy_trigger = is_oversold and is_trending_bullish # and has_turned_up
                         sell_trigger = (c_rsi > 70) or (c_price >= c_res * 0.99)
                         
                         if current_position == 0:
