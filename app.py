@@ -73,14 +73,73 @@ if app_mode == "Market Scanner":
             raw_data = yf.download(tickers, start="2024-01-01", group_by="ticker")
             summary_rows = []
             
+            def optimize_window_parameter(stock_df):
+                """
+                Simulates performance across windows 30-120 to find the most robust setting 
+                based on the preceding 6 months of capital growth data.
+                """
+                best_window = 65 # Default structural quarter anchor if optimization ties
+                max_strategy_return = -999.0
+                
+                # Isolate a trailing 180-day optimization training slice matrix
+                train_df = stock_df.tail(180).copy()
+                if len(train_df) < 100:
+                    return best_window
+
+                # Scan the parameter spectrum using a 5-day stride for robustness
+                for test_w in range(30, 121, 5):
+                    sim = train_df.copy()
+                    sim["Support"] = sim["Close"].rolling(window=test_w).min()
+                    sim["Resistance"] = sim["Close"].rolling(window=test_w).max()
+                    
+                    delta = sim["Close"].diff()
+                    gain = delta.where(delta > 0, 0.0)
+                    loss = -delta.where(delta < 0, 0.0)
+                    sim["RSI"] = 100 - (100 / (1 + (gain.rolling(14).mean() / loss.rolling(14).mean())))
+                    
+                    sim["Position"] = 0
+                    curr_pos = 0
+                    fixed_stop = np.nan
+                    
+                    for i in range(1, len(sim)):
+                        c_p = sim["Close"].iloc[i]
+                        p_p = sim["Close"].iloc[i - 1]
+                        c_rsi = sim["RSI"].iloc[i]
+                        c_sup = sim["Support"].iloc[i]
+                        c_res = sim["Resistance"].iloc[i]
+                        
+                        buy = (c_rsi < 30 or c_p <= c_sup * 1.01) # and (c_p > p_p)
+                        sell = (c_rsi > 70 or c_p >= c_res * 0.99)
+                        
+                        if curr_pos == 0:
+                            if buy:
+                                curr_pos = 1
+                                fixed_stop = c_sup * 0.98
+                        else:
+                            if c_p <= fixed_stop or sell:
+                                curr_pos = 0
+                        sim.iloc[i, sim.columns.get_loc("Position")] = curr_pos
+                        
+                    sim["M_Ret"] = sim["Close"].pct_change()
+                    sim["S_Ret"] = sim["M_Ret"] * sim["Position"].shift(1)
+                    cum_prod = (1 + sim["S_Ret"].fillna(0)).cumprod().iloc[-1]
+                    
+                    if cum_prod > max_strategy_return:
+                        max_strategy_return = cum_prod
+                        best_window = test_w
+                        
+                return best_window
+
             for ticker in tickers:
                 try:
                     data = raw_data[ticker].dropna().copy()
                     if data.empty: continue
                     
+                    # Execute adaptive walk forward optimization to find the best rolling window parameter for this ticker
+                    optimal_w = optimize_window_parameter(data)
                     # Math Indicators block (Support, Resistance, RSI, ATR)
-                    data["Support"] = data["Close"].rolling(window=85).min()
-                    data["Resistance"] = data["Close"].rolling(window=85).max()
+                    data["Support"] = data["Close"].rolling(window=optimal_w).min()
+                    data["Resistance"] = data["Close"].rolling(window=optimal_w).max()
                     
                     delta = data["Close"].diff()
                     gain = delta.where(delta > 0, 0.0)
@@ -105,7 +164,7 @@ if app_mode == "Market Scanner":
                     data["Position"] = 0
                     data["Stop_Line"] = np.nan
                     current_position = 0
-                    fixed_stop_floor = 0.0
+                    fixed_stop_floor = np.nan
                     
                     for i in range(1, len(data)):
                         c_price = data["Close"].iloc[i]
