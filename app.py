@@ -409,7 +409,7 @@ elif app_mode == "Nick's Account Ledger":
     with col3:
         st.metric("💵 Total Dividends Collected", f"${total_dividends_collected:,.2f}", delta=f"+${total_dividends_collected:,.2f}" if total_dividends_collected > 0 else None)
     with col4:
-        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}")
+        st.metric("Total Estimated Taxes", f"${net_realized_pnl * 0.16:,.2f}", help="Estimated 16% short-term capital gains tax liability on realized profits.\nMore information below in Tax Loss Harvesting section.")
     # ==============================================================================
     # 3. VISUAL PORTFOLIO PERFORMANCE LINE GRAPH CHART
     # ==============================================================================
