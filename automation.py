@@ -158,15 +158,15 @@ for ticker in tickers:
         sell_signals = data[(data["State_Shift"] == -1) | ((data["Position"].shift(1) == 1) & (data["Position"] == 0))]
 
         if latest["Position"] == 1 and prev["Position"] == 0:
-            recommendation = "🟢 BUY SIGNAL"
+            recommendation = '<font color="limegreen"><b>BUY SIGNAL</b></font>'
         elif latest["Position"] == 0 and prev["Position"] == 1:
-            recommendation = "🔴 SELL TRIGGER"
+            recommendation = '<font color="crimson"><b>SELL TRIGGER</b></font>'
         elif latest["Position"] == 0 and is_wash_sale_risk:
-            recommendation = "🟡 WASH SALE RISK"
+            recommendation = '<font color="orange"><b>WASH SALE RISK</b></font>'
         elif latest["Position"] == 1:
-            recommendation = "🔵 HOLD LONG"
+            recommendation = '<font color="darkblue"><b>HOLD LONG</b></font>'
         else:
-            recommendation = "⚪ CASH STATUS"
+            recommendation = '<font color="gray"><b>CASH STATUS</b></font>'
 
         summary_rows.append(f"<b>{ticker}</b>: {recommendation} (Price: ${latest['Close']:.2f} | RSI: {latest['RSI']:.1f})")
         
