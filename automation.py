@@ -201,7 +201,7 @@ for ticker in tickers:
 # 3. CONSTRUCT THE MULTI-PAGE PDF DOCUMENT
 # ==============================================================================
 pdf_filename = "Daily_Stock_Report.pdf"
-doc = SimpleDocTemplate(pdf_filename, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+doc = SimpleDocTemplate(pdf_filename, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=10, bottomMargin=10)
 styles = getSampleStyleSheet()
 
 # Create clean corporate layout typographic sheets
