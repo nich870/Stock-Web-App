@@ -145,8 +145,8 @@ if app_mode == "Market Scanner":
                     # Execute adaptive walk forward optimization to find the best rolling window parameter for this ticker
                     optimal_w = optimize_window_parameter(data)
                     # Math Indicators block (Support, Resistance, RSI, ATR)
-                    data["Support"] = data["Close"].rolling(window=optimal_w).min()
-                    data["Resistance"] = data["Close"].rolling(window=optimal_w).max()
+                    data["Support"] = data["Close"].rolling(window=50).min()
+                    data["Resistance"] = data["Close"].rolling(window=50).max()
                     
                     delta = data["Close"].diff()
                     gain = delta.where(delta > 0, 0.0)
