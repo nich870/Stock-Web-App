@@ -95,8 +95,8 @@ for ticker in tickers:
         
         optimal_w = optimize_window_parameter(data)
         # Core Algorithmic Indicators block
-        data["Support"] = data["Close"].rolling(window=optimal_w).min()
-        data["Resistance"] = data["Close"].rolling(window=optimal_w).max()
+        data["Support"] = data["Close"].rolling(window=50).min()
+        data["Resistance"] = data["Close"].rolling(window=50).max()
         data["Long_Trend"] = data["Close"].rolling(window=200).mean()
         
         delta = data["Close"].diff()
