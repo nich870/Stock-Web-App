@@ -382,7 +382,7 @@ elif app_mode == "Strategy Discovery Scout":
             st.write("---")
             if discovered_opportunities:
                 st.subheader("🎯 Qualified Practice Targets Found")
-                st.write("These assets match your setup rules. Use your **Ledger Pro** tab to open fake paper positions in these stocks to practice managing your structural stop-loss floors risk-free.")
+                st.write("These assets match your setup rules.")
                 
                 # Render responsive data grid layout
                 df_scout = pd.DataFrame(discovered_opportunities)

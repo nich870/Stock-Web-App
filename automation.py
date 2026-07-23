@@ -105,7 +105,7 @@ for ticker in tickers:
         data["RSI"] = 100 - (100 / (1 + (gain.rolling(14).mean() / loss.rolling(14).mean())))
         
         # Align time matrices windows for presentation
-        data = data.loc["2025-11-01":].copy()
+        # data = data.loc["2025-11-01":].copy() # Change this line to dynamically select the last 8 months of data based on the current date
         
         # Initialize simulation registers for state evaluation
         data["Position"] = 0
@@ -187,7 +187,13 @@ for ticker in tickers:
         fig.add_hline(y=70, line_dash="dot", line_color="red", row=2, col=1)
         fig.add_hline(y=30, line_dash="dot", line_color="green", row=2, col=1)
 
-        fig.update_layout(height=350, width=600, showlegend=False, margin=dict(l=20, r=20, t=20, b=20))
+        today_timestamp = data.index[-1]
+        initial_zoom = today_timestamp - pd.DateOffset(months=8)
+        fig.update_layout(height=350, width=600, showlegend=False, margin=dict(l=20, r=20, t=20, b=20),
+                          xaxis=dict(
+                              range=[initial_zoom, today_timestamp],
+                              type="date"
+                          ))
         
         # Export chart image file locally inside the server instance sandbox
         img_filename = f"{ticker}_chart.png"
