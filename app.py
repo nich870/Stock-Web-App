@@ -341,6 +341,9 @@ elif app_mode == "Strategy Discovery Scout":
                     # 1. Technical Math Core Processing
                     data["200_SMA"] = data["Close"].rolling(window=200).mean()
                     data["20_Min"] = data["Close"].rolling(window=20).min()
+                    # Calculate Trading Volume
+                    data["Daily_Volume"] = data["Volume"].iloc[-1]
+                    
                     delta = data["Close"].diff()
                     gain = delta.where(delta > 0, 0.0)
                     loss = -delta.where(delta < 0, 0.0)
@@ -354,12 +357,13 @@ elif app_mode == "Strategy Discovery Scout":
                     support_20d = latest["20_Min"]
                     
                     # 2. EVALUATE THE IDEAL PULLBACK MATRIX CONDITIONS
+                    is_trading_volume_healthy = latest["Daily_Volume"] >= 1000000  # Minimum liquidity threshold
                     is_bull_market = price > sma_200
                     is_oversold_velocity = rsi <= 40
                     is_near_support = price <= (support_20d * 1.03) # Within 3% of its recent floor
                     
                     # If the stock passes our quality filters, flag it as a premium practice target
-                    if is_bull_market and is_oversold_velocity:
+                    if is_bull_market and is_oversold_velocity and is_trading_volume_healthy:
                         # Calculate the proximity to the support line to display trade quality
                         discount_pct = ((price - support_20d) / support_20d) * 100
                         
@@ -367,6 +371,7 @@ elif app_mode == "Strategy Discovery Scout":
                             "Practice Ticker": ticker,
                             "Current Price": f"${price:.2f}",
                             "RSI Value": f"{rsi:.1f}",
+                            "Trading Volume": f"{latest['Daily_Volume']:,}",
                             "Proximity to Support": f"+{discount_pct:.1f}%",
                             "Action Strategy": "🟢 ACTIVE DIP - Practice Layering Buy Orders" if is_near_support else "🔵 WATCHING - Awaiting Support Test"
                         })
