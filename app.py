@@ -59,7 +59,7 @@ with col_logout:
         st.session_state["authenticated"] = False
         st.rerun()
 
-app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Nick's Account Ledger", "Jacob's Account Ledger"])
+app_mode = st.sidebar.selectbox("Choose Application:", ["Market Scanner", "Strategy Discovery Scout", "Nick's Account Ledger", "Jacob's Account Ledger"])
 if app_mode == "Market Scanner":
     # User Input Array accessible directly from a mobile layout interface
     with col_title:
@@ -317,7 +317,7 @@ if app_mode == "Market Scanner":
 # ==============================================================================
 # PANEL MODE: Strategy Discovery Scout
 # ==============================================================================
-elif app_mode == "🧭 Strategy Discovery Scout":
+elif app_mode == "Strategy Discovery Scout":
     st.title("🧭 Dip-Buying Strategy Discovery Scout")
     st.write("This scouting panel systematically screens major market equities to identify high-probability bull market pullbacks for tactical practice.")
     
