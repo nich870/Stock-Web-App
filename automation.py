@@ -193,6 +193,10 @@ for ticker in tickers:
                           xaxis=dict(
                               range=[initial_zoom, today_timestamp],
                               type="date"
+                          ),
+                          xaxis2=dict(
+                              range=[initial_zoom, today_timestamp],
+                              type="date"
                           ))
         
         # Export chart image file locally inside the server instance sandbox
