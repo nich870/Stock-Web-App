@@ -143,7 +143,7 @@ if app_mode == "Market Scanner":
                     if data.empty: continue
                     
                     # Execute adaptive walk forward optimization to find the best rolling window parameter for this ticker
-                    optimal_w = optimize_window_parameter(data)
+                    # optimal_w = optimize_window_parameter(data)
                     # Math Indicators block (Support, Resistance, RSI, ATR)
                     data["Support"] = data["Close"].rolling(window=50).min()
                     data["Resistance"] = data["Close"].rolling(window=50).max()
@@ -165,7 +165,7 @@ if app_mode == "Market Scanner":
                     data["Long_Trend"] = data["Close"].rolling(window=200).mean()
                     
                     # Filter down to our graphing presentation window (Nov 2025 to July 2026)
-                    data = data.loc["2025-11-01":].copy()
+                    data = data.loc["2024-01-01":].copy()
                     
                     # Anti-Falling Knife Trigger Logic & Stop-Loss Simulation Loop
                     data["Position"] = 0

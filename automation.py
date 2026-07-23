@@ -93,7 +93,7 @@ for ticker in tickers:
         data = raw_data[ticker].dropna().copy()
         if data.empty: continue
         
-        optimal_w = optimize_window_parameter(data)
+        # optimal_w = optimize_window_parameter(data)
         # Core Algorithmic Indicators block
         data["Support"] = data["Close"].rolling(window=50).min()
         data["Resistance"] = data["Close"].rolling(window=50).max()
