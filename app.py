@@ -282,7 +282,7 @@ if app_mode == "Market Scanner":
                     fig.update_yaxes(range=[10, 90], row=2, col=1)
 
                     today_timestamp = data.index[-1]
-                    initial_zoom_start = "2025-11-01" # Maybe change this to 8 months prior to today dynamically in the future
+                    initial_zoom_start = today_timestamp - pd.DateOffset(months=8)  # Maybe change this to 8 months prior to today dynamically in the future
                     fig.update_layout(
                         template="plotly_white",
                         height=450,
