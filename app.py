@@ -165,7 +165,7 @@ if app_mode == "Market Scanner":
                     data["Long_Trend"] = data["Close"].rolling(window=200).mean()
                     
                     # Filter down to our graphing presentation window (Nov 2025 to July 2026)
-                    data = data.loc["2024-01-01":].copy()
+                    # data = data.loc["2024-01-01":].copy()
                     
                     # Anti-Falling Knife Trigger Logic & Stop-Loss Simulation Loop
                     data["Position"] = 0
@@ -280,8 +280,31 @@ if app_mode == "Market Scanner":
                     fig.add_hline(y=70, line_dash="dot", line_color="red", line_width=1.5, row=2, col=1)
                     fig.add_hline(y=30, line_dash="dot", line_color="green", line_width=1.5, row=2, col=1)
                     fig.update_yaxes(range=[10, 90], row=2, col=1)
-                    
-                    fig.update_layout(height=400, margin=dict(l=10, r=10, t=10, b=10), showlegend=False)
+
+                    today_timestamp = data.index[-1]
+                    initial_zoom_start = "2025-11-01" # Maybe change this to 8 months prior to today dynamically in the future
+                    fig.update_layout(
+                        template="plotly_white",
+                        height=450,
+                        margin=dict(l=10, r=10, t=10, b=10),
+                        showlegend=False,
+
+                        # Price Viewport constraints
+                        xaxis=dict(
+                            range=[initial_zoom_start, today_timestamp], # Forces default zoom to the last 8 months of data
+                            rangeslider=dict(
+                                visible=True, # Spins up an interactive range slider for mobile users (Maybe try without sometimes)
+                                thickness=0.04
+                            ),
+                            type="date"
+                        ),
+
+                        # RSI Panel synchronization
+                        xaxis2=dict(
+                            range=[initial_zoom_start, today_timestamp],
+                            type="date"
+                        )
+                    )
                     st.plotly_chart(fig, use_container_width=True)
                     
                 except Exception as e:
