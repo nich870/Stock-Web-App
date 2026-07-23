@@ -314,6 +314,96 @@ if app_mode == "Market Scanner":
             st.subheader("📋 Execution Scorecard Summary")
             st.dataframe(pd.DataFrame(summary_rows), use_container_width=True)
 
+# ==============================================================================
+# PANEL MODE: Strategy Discovery Scout
+# ==============================================================================
+elif app_mode == "🧭 Strategy Discovery Scout":
+    st.title("🧭 Dip-Buying Strategy Discovery Scout")
+    st.write("This scouting panel systematically screens major market equities to identify high-probability bull market pullbacks for tactical practice.")
+    
+    # Curated broad market scanning pool array spanning diverse sectors
+    scout_pool = [
+        "NVDA", "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "AMD", "AVGO", "MU",
+        "NFLX", "COST", "WMT", "JPM", "BAC", "V", "MA", "DIS", "XOM", "CVX",
+        "PG", "JNJ", "LLY", "UNH", "HD", "LOW", "ORCL", "CRM", "INTC", "QCOM"
+    ]
+    
+    if st.button("🚀 Execute Broad Market Pullback Scan", use_container_width=True):
+        with st.spinner("Analyzing volume channels, velocity curves, and trend lines..."):
+            
+            # Fetch a 1-year data chunk to fully populate our 200-day SMA matrices
+            raw_scout_data = yf.download(scout_pool, period="1y", group_by="ticker")
+            discovered_opportunities = []
+            
+            for ticker in scout_pool:
+                try:
+                    data = raw_scout_data[ticker].dropna().copy()
+                    if len(data) < 200: continue
+                    
+                    # 1. Technical Math Core Processing
+                    data["200_SMA"] = data["Close"].rolling(window=200).mean()
+                    data["20_Min"] = data["Close"].rolling(window=20).min()
+                    
+                    delta = data["Close"].diff()
+                    gain = delta.where(delta > 0, 0.0)
+                    loss = -delta.where(delta < 0, 0.0)
+                    data["RSI"] = 100 - (100 / (1 + (gain.rolling(14).mean() / loss.rolling(14).mean())))
+                    
+                    # Extract final tracking variables
+                    latest = data.iloc[-1]
+                    price = latest["Close"]
+                    rsi = latest["RSI"]
+                    sma_200 = latest["200_SMA"]
+                    support_20d = latest["20_Min"]
+                    
+                    # 2. EVALUATE THE IDEAL PULLBACK MATRIX CONDITIONS
+                    is_bull_market = price > sma_200
+                    is_oversold_velocity = rsi <= 40
+                    is_near_support = price <= (support_20d * 1.03) # Within 3% of its recent floor
+                    
+                    # If the stock passes our quality filters, flag it as a premium practice target
+                    if is_bull_market and is_oversold_velocity:
+                        # Calculate the proximity to the support line to display trade quality
+                        discount_pct = ((price - support_20d) / support_20d) * 100
+                        
+                        discovered_opportunities.append({
+                            "Practice Ticker": ticker,
+                            "Current Price": f"${price:.2f}",
+                            "RSI Value": f"{rsi:.1f}",
+                            "Proximity to Support": f"+{discount_pct:.1f}%",
+                            "Action Strategy": "🟢 ACTIVE DIP - Practice Layering Buy Orders" if is_near_support else "🔵 WATCHING - Awaiting Support Test"
+                        })
+                except Exception as e:
+                    pass
+            
+            # 3. RENDER RESULTS INTERFACE TO PHONE SCREEN
+            st.write("---")
+            if discovered_opportunities:
+                st.subheader("🎯 Qualified Practice Targets Found")
+                st.write("These assets match your setup rules. Use your **Ledger Pro** tab to open fake paper positions in these stocks to practice managing your structural stop-loss floors risk-free.")
+                
+                # Render responsive data grid layout
+                df_scout = pd.DataFrame(discovered_opportunities)
+                st.dataframe(df_scout, use_container_width=True)
+                
+                # Dynamic Touchscreen Card loops
+                for opt in discovered_opportunities:
+                    with st.container():
+                        st.markdown(
+                            f"""
+                            <div style="background-color:#F0F8FF; border-radius:8px; padding:12px; margin-bottom:12px; border-left: 5px solid #1E90FF;">
+                                <h4 style="margin:0; color:#1E3F66;">🎯 Target: {opt['Practice Ticker']} — {opt['Current Price']}</h4>
+                                <p style="margin:4px 0 0 0; font-size:14px; color:#333333;">
+                                    <b>RSI Velocity</b>: {opt['RSI Value']} | <b>Floor Proximity</b>: {opt['Proximity to Support']}<br>
+                                    <b>Strategy Focus</b>: {opt['Action Strategy']}
+                                </p>
+                            </div>
+                            """, 
+                            unsafe_allow_html=True
+                        )
+            else:
+                st.info("ℹ️ **Market Analysis Complete**: No stocks are currently experiencing an active bull market pullback. The broader market is either too overextended (RSI > 40) or in a structural bear market trend under the 200-day line. Capital protection is active; preserve your uninvested cash.")
+
 elif app_mode == "Nick's Account Ledger":
     # Render Account Ledger interface
     import streamlit as st
