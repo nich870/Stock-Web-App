@@ -100,6 +100,9 @@ session.headers.update({
 for ticker in tickers:
     try:
         stock_data = yf.download(ticker, start="2024-01-01", session=session, progress=False)
+        if isinstance(stock_data.columns, pd.MultiIndex):
+            stock_data.columns.get_level_values(0)
+            
         data = stock_data.dropna().copy()
         if data.empty or len(data) < 200:
             summary_rows.append(f"<b>{ticker}</b>: <font color='red'>API Data Deficit (Skipped)</font>")
