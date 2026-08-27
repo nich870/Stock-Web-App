@@ -21,7 +21,7 @@ summary_rows = []
 generated_images = []
 
 # Fetch extended history to clear 200-day rolling calculations cushion
-raw_data = yf.download(tickers, start="2024-01-01", group_by="ticker")
+# raw_data = yf.download(tickers, start="2024-01-01", group_by="ticker")
 
 def optimize_window_parameter(stock_df):
     """
@@ -88,10 +88,22 @@ def optimize_window_parameter(stock_df):
             
     return best_window
 
+import time
+import requests
+
+# Force yfinance to utilize a standard web browser signature
+session = requests.Session()
+session.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+})
+
 for ticker in tickers:
     try:
-        data = raw_data[ticker].dropna().copy()
-        if data.empty: continue
+        stock_data = yf.download(ticker, start="2024-01-01", session=session, progress=False)
+        data = stock_data.dropna().copy()
+        if data.empty or len(data) < 200:
+            summary_rows.append(f"<b>{ticker}</b>: <font color='red'>API Data Deficit (Skipped)</font>")
+            continue
         
         # optimal_w = optimize_window_parameter(data)
         # Core Algorithmic Indicators block
@@ -203,9 +215,11 @@ for ticker in tickers:
         img_filename = f"{ticker}_chart.png"
         fig.write_image(img_filename, engine="kaleido")
         generated_images.append((ticker, img_filename))
+        time.sleep(2)
         
     except Exception as e:
         print(f"Error processing pipeline for {ticker}: {e}")
+        summary_rows.append(f"<b>{ticker}</b>: <font color='red'>Execution Aborted ({str(e)})</font>")
 
 # ==============================================================================
 # 3. CONSTRUCT THE MULTI-PAGE PDF DOCUMENT

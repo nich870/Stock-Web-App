@@ -5,3 +5,5 @@ numpy
 plotly
 kaleido==0.2.1
 reportlab
+time
+requests
