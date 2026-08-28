@@ -214,7 +214,7 @@ for ticker in tickers:
         
         # Export chart image file locally inside the server instance sandbox
         img_filename = f"{ticker}_chart.png"
-        fig.write_image(img_filename, engine="kaleido")
+        fig.write_image(img_filename)                              # Problem with this line??? "Unexpected 'Engine' keyword"   , engine="kaleido"
         generated_images.append((ticker, img_filename))
         time.sleep(2)
         
