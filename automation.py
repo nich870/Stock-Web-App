@@ -97,12 +97,23 @@ def optimize_window_parameter(stock_df):
             
     return best_window
 
+def fetch_ticker_data_with_retry(ticker, max_retries=3, delay_seconds=2):
+    for attempt in range(1, max_retries + 1):
+        # Fetch the ticker data
+        data = raw_data[ticker].dropna().copy()
 
+        if not data.empty:
+            return data
+
+        time.sleep(delay_seconds)
+
+        return None # Returns None if all entries fail
 
 for ticker in tickers:
     try:
-        data = raw_data[ticker].dropna().copy()
-        if data.empty or len(data) < 200:
+
+        data = fetch_ticker_data_with_retry()
+        if data is None or len(data) < 200:
             summary_rows.append(f"<b>{ticker}</b>: <font color='red'>API Data Deficit (Skipped)</font>")
             continue
         
