@@ -1,12 +1,11 @@
 name: Daily AlgoScanner Automator
 
 on:
-  # Accepts external webhook calls
-  repository_dispatch:
-    types: [run-algo-scan]
-    
-  # Retain manual execution from the GitHub UI
-  workflow_dispatch:
+  schedule:
+    # Cron syntax coordinates to execute precisely twice a day
+    - cron: '04 20 * * 1-5' # 1. Runs Monday-Friday at 4:04 PM EDT (Post-market close @ 3:04 CDT)
+    - cron: '47 13 * * 1-5' # 2. Runs Monday-Friday at 9:47 AM EDT (Morning confirmation check @ 8:47 CDT)
+  workflow_dispatch: # Allows you to click a button on GitHub to test run manually anytime
 
 jobs:
   run-scanner-logic:
