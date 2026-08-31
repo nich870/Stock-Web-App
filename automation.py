@@ -200,15 +200,16 @@ for ticker in tickers:
         fig.add_hline(y=70, line_dash="dot", line_color="red", row=2, col=1)
         fig.add_hline(y=30, line_dash="dot", line_color="green", row=2, col=1)
 
-        today_timestamp = data.index[-1]
-        initial_zoom = today_timestamp - pd.DateOffset(months=8)
+        # Convert to ISO date strings for Plotly's JSON serializer
+        today_str = data.index[-1].strftime('%Y-%m-%d')
+        initial_zoom_str = (data.index[-1] - pd.DateOffset(months=8)).strftime('%Y-%m-%d')
         fig.update_layout(height=350, width=600, showlegend=False, margin=dict(l=20, r=20, t=20, b=20),
                           xaxis=dict(
-                              range=[initial_zoom, today_timestamp],
+                              range=[initial_zoom_str, today_str],
                               type="date"
                           ),
                           xaxis2=dict(
-                              range=[initial_zoom, today_timestamp],
+                              range=[initial_zoom_str, today_str],
                               type="date"
                           ))
         
