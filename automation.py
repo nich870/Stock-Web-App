@@ -111,8 +111,7 @@ def fetch_ticker_data_with_retry(ticker, max_retries=3, delay_seconds=2):
 
 for ticker in tickers:
     try:
-
-        data = fetch_ticker_data_with_retry()
+        data = fetch_ticker_data_with_retry(ticker, max_retries=3, delay_seconds=2)
         if data is None or len(data) < 200:
             summary_rows.append(f"<b>{ticker}</b>: <font color='red'>API Data Deficit (Skipped)</font>")
             continue
